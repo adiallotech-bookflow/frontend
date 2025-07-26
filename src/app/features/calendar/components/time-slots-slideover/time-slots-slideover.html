@@ -1,0 +1,100 @@
+@if (isOpen()) {
+  <div class="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <!-- Background backdrop -->
+    <div 
+      class="fixed inset-0 bg-gray-500/75 transition-opacity"
+      [class.opacity-100]="isOpen()"
+      [class.opacity-0]="!isOpen()"
+      (click)="onClose()"
+    ></div>
+
+    <div class="fixed inset-0 overflow-hidden">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+          <div 
+            class="pointer-events-auto w-screen max-w-md transform transition duration-500 ease-in-out"
+            [class.translate-x-0]="isOpen()"
+            [class.translate-x-full]="!isOpen()"
+          >
+            <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+              <div class="bg-indigo-700 px-4 py-6 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <h2 id="slide-over-title" class="text-base font-semibold text-white">
+                    Available Time Slots
+                  </h2>
+                  <div class="ml-3 flex h-7 items-center">
+                    <button
+                      type="button"
+                      (click)="onClose()"
+                      class="relative rounded-md bg-indigo-700 text-indigo-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <span class="absolute -inset-2.5"></span>
+                      <span class="sr-only">Close panel</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
+                        <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                @if (dayAvailability()) {
+                  <div class="mt-1">
+                    <p class="text-sm text-indigo-300">
+                      {{ dayAvailability()!.date | date:'EEEE, MMMM d, y' }}
+                    </p>
+                  </div>
+                }
+              </div>
+              
+              <div class="flex-1 px-4 py-6 sm:px-6">
+                @if (dayAvailability()) {
+                  <div class="grid grid-cols-2 gap-3">
+                    @for (slot of dayAvailability()!.timeSlots; track slot.startTime) {
+                      <button
+                        type="button"
+                        [disabled]="!slot.isAvailable"
+                        (click)="slot.isAvailable && onSelectTimeSlot(slot.startTime)"
+                        class="rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors"
+                        [class.bg-white]="slot.isAvailable"
+                        [class.text-gray-900]="slot.isAvailable"
+                        [class.ring-gray-300]="slot.isAvailable"
+                        [class.hover:bg-gray-50]="slot.isAvailable"
+                        [class.bg-gray-100]="!slot.isAvailable"
+                        [class.text-gray-400]="!slot.isAvailable"
+                        [class.ring-gray-200]="!slot.isAvailable"
+                        [class.cursor-not-allowed]="!slot.isAvailable"
+                      >
+                        {{ slot.startTime }}
+                      </button>
+                    }
+                  </div>
+                  
+                  <div class="mt-8">
+                    <h3 class="text-sm font-medium text-gray-900">Booking Information</h3>
+                    <div class="mt-2 text-sm text-gray-500">
+                      <p>Click on an available time slot to book an appointment.</p>
+                      <p class="mt-2">Each appointment slot is 30 minutes long.</p>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="text-center text-gray-500">
+                    <p>No availability information for this date.</p>
+                  </div>
+                }
+              </div>
+              
+              <div class="flex shrink-0 justify-end px-4 py-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  (click)="onClose()"
+                  class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
