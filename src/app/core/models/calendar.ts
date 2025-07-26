@@ -23,6 +23,8 @@ export interface CalendarTimeSlot {
   startTime: string;
   endTime: string;
   isAvailable: boolean;
+  professionalId?: string;
+  professionalName?: string;
 }
 
 export interface DayAvailability {
@@ -41,4 +43,16 @@ export interface DateTimeAvailabilityCheck {
   date: Date;
   time: string;
   isAvailable: boolean;
+}
+
+export interface GroupedSlots {
+  morning: CalendarTimeSlot[];
+  afternoon: CalendarTimeSlot[];
+  evening: CalendarTimeSlot[];
+}
+
+export interface SlotSelectionEvent {
+  time: string;
+  professionalId?: string;
+  professionalName?: string;
 }

@@ -129,7 +129,9 @@ export class CalendarService {
       timeSlots.push({
         startTime: slotTimeString,
         endTime: format(slotEnd, 'HH:mm'),
-        isAvailable: !bookedSlots.includes(slotTimeString)
+        isAvailable: !bookedSlots.includes(slotTimeString),
+        professionalId: 'prof-1',
+        professionalName: 'Dr. Sarah Johnson'
       });
 
       currentSlot = slotEnd;

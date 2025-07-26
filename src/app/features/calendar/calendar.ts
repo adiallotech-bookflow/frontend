@@ -89,8 +89,8 @@ export class Calendar {
     this.showDayDetails.set(false);
   }
 
-  onTimeSlotSelected(timeSlot: string): void {
-    console.log('Selected time slot:', timeSlot);
+  onTimeSlotSelected(event: any): void {
+    console.log('Selected time slot:', event);
     // Here you can implement the booking logic
     // For now, we'll just close the slide-over
     this.closeDayDetails();
