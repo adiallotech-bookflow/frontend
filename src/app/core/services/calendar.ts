@@ -17,7 +17,6 @@ import {
   isAfter,
   isBefore,
   isEqual,
-  parseISO,
   addMinutes
 } from 'date-fns';
 import {
@@ -57,9 +56,9 @@ export class CalendarService {
     let currentWeek: CalendarDay[] = [];
     let currentWeekNumber = 0;
 
-    days.forEach((day, index) => {
+    days.forEach((day) => {
       const weekNumber = getWeek(day, { weekStartsOn: 1 });
-      
+
       if (currentWeekNumber !== weekNumber && currentWeek.length > 0) {
         weeks.push({
           weekNumber: currentWeekNumber,
@@ -67,7 +66,7 @@ export class CalendarService {
         });
         currentWeek = [];
       }
-      
+
       currentWeekNumber = weekNumber;
 
       const dayOfWeek = day.getDay();
@@ -104,7 +103,7 @@ export class CalendarService {
     const dayOfWeek = date.getDay();
     const dateKey = format(date, 'yyyy-MM-dd');
     const bookedSlots = this.bookedSlots.get(dateKey) || [];
-    
+
     const dayAvailability = this.professionalAvailability.find(
       availability => availability.dayOfWeek === dayOfWeek
     );
@@ -119,14 +118,14 @@ export class CalendarService {
     const timeSlots: CalendarTimeSlot[] = [];
     const [startHour, startMinute] = dayAvailability.startTime.split(':').map(Number);
     const [endHour, endMinute] = dayAvailability.endTime.split(':').map(Number);
-    
+
     let currentSlot = setMinutes(setHours(date, startHour), startMinute);
     const endTime = setMinutes(setHours(date, endHour), endMinute);
 
     while (isBefore(currentSlot, endTime)) {
       const slotEnd = addMinutes(currentSlot, dayAvailability.slotDurationMinutes);
       const slotTimeString = format(currentSlot, 'HH:mm');
-      
+
       timeSlots.push({
         startTime: slotTimeString,
         endTime: format(slotEnd, 'HH:mm'),
@@ -154,7 +153,7 @@ export class CalendarService {
     const dayOfWeek = date.getDay();
     const dateKey = format(date, 'yyyy-MM-dd');
     const bookedSlots = this.bookedSlots.get(dateKey) || [];
-    
+
     const dayAvailability = this.professionalAvailability.find(
       availability => availability.dayOfWeek === dayOfWeek
     );
@@ -170,14 +169,14 @@ export class CalendarService {
     const [requestHour, requestMinute] = time.split(':').map(Number);
     const [startHour, startMinute] = dayAvailability.startTime.split(':').map(Number);
     const [endHour, endMinute] = dayAvailability.endTime.split(':').map(Number);
-    
+
     const requestedTime = setMinutes(setHours(date, requestHour), requestMinute);
     const startTime = setMinutes(setHours(date, startHour), startMinute);
     const endTime = setMinutes(setHours(date, endHour), endMinute);
 
-    const isWithinBusinessHours = (isAfter(requestedTime, startTime) || isEqual(requestedTime, startTime)) && 
+    const isWithinBusinessHours = (isAfter(requestedTime, startTime) || isEqual(requestedTime, startTime)) &&
                                  isBefore(requestedTime, endTime);
-    
+
     const isNotBooked = !bookedSlots.includes(time);
     const isNotInPast = !isBefore(date, new Date());
 
