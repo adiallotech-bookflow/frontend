@@ -1,5 +1,6 @@
 import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { animate, style, transition, trigger, stagger, query } from '@angular/animations';
 import { interval, Subscription } from 'rxjs';
 import { formatDistanceToNow, isFuture, addDays, format } from 'date-fns';
@@ -7,7 +8,7 @@ import { DashboardAppointment, DashboardStats, DashboardActivity } from '../../c
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   animations: [

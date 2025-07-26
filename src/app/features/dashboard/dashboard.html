@@ -1,9 +1,22 @@
 <div class="min-h-screen bg-gray-50 py-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-      <p class="mt-1 text-sm text-gray-500">Welcome back, John!</p>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p class="mt-1 text-sm text-gray-500">Welcome back, John!</p>
+      </div>
+      <div class="mt-4 sm:mt-0">
+        <a
+          routerLink="/booking"
+          class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <svg class="mr-2 -ml-1 h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Start a Booking
+        </a>
+      </div>
     </div>
 
     <!-- Quick Stats -->
@@ -162,7 +175,7 @@
             <h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming appointments</h3>
             <p class="mt-1 text-sm text-gray-500">Book your next appointment to get started.</p>
             <div class="mt-6">
-              <a href="/booking" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+              <a routerLink="/booking" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                 Book Appointment
               </a>
             </div>
