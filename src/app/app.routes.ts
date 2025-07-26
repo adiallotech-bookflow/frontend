@@ -13,11 +13,13 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
+        title: 'Dashboard - BookFlow'
       },
       {
         path: 'calendar',
-        loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar)
+        loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar),
+        title: 'Calendar - BookFlow'
       }
     ]
   }
