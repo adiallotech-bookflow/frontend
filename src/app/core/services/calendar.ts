@@ -17,7 +17,8 @@ import {
   isAfter,
   isBefore,
   isEqual,
-  addMinutes
+  addMinutes,
+  startOfDay
 } from 'date-fns';
 import {
   CalendarDay,
@@ -80,7 +81,7 @@ export class CalendarService {
         isCurrentMonth: isSameMonth(day, date),
         isToday: isToday(day),
         isWeekend: isWeekend(day),
-        isAvailable: hasAvailability && isSameMonth(day, date) && !isBefore(day, new Date())
+        isAvailable: hasAvailability && isSameMonth(day, date) && !isBefore(startOfDay(day), startOfDay(new Date()))
       });
     });
 
@@ -180,7 +181,7 @@ export class CalendarService {
                                  isBefore(requestedTime, endTime);
 
     const isNotBooked = !bookedSlots.includes(time);
-    const isNotInPast = !isBefore(date, new Date());
+    const isNotInPast = !isBefore(startOfDay(date), startOfDay(new Date()));
 
     return {
       date,

@@ -1,0 +1,112 @@
+<div>
+  <h2 class="text-2xl font-semibold text-gray-900 mb-2">Select Date & Time</h2>
+  <p class="text-gray-600 mb-6">with {{ selectedProfessional().name }}</p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Calendar -->
+    <div>
+      <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <!-- Calendar Header -->
+        <div class="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            (click)="previousMonth()"
+            class="p-2 text-gray-400 hover:text-gray-500"
+          >
+            <svg class="h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <h3 class="text-lg font-semibold text-gray-900">
+            {{ calendarMonth().name }}
+          </h3>
+
+          <button
+            type="button"
+            (click)="nextMonth()"
+            class="p-2 text-gray-400 hover:text-gray-500"
+          >
+            <svg class="h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Weekday Headers -->
+        <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-700 mb-2">
+          @for (day of weekDays; track day) {
+            <div class="py-2">{{ day }}</div>
+          }
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="grid grid-cols-7 gap-1 text-sm">
+          @for (week of calendarMonth().weeks; track week.weekNumber) {
+            @for (day of week.days; track day.date) {
+              <div
+                (click)="selectDate(day)"
+                [class]="getDayClasses(day)"
+              >
+                <time [dateTime]="day.date.toISOString()">
+                  {{ day.dayNumber }}
+                </time>
+
+                @if (day.isToday && day.isCurrentMonth) {
+                  <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full"></div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Slots -->
+    <div>
+      @if (localSelectedDate()) {
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Available Times</h3>
+          <p class="text-sm text-gray-600 mb-4">{{ formatDate(localSelectedDate()!) }}</p>
+
+          @if (availableTimeSlots().length > 0) {
+            <div class="grid grid-cols-3 gap-2">
+              @for (slot of availableTimeSlots(); track slot.startTime) {
+                <button
+                  type="button"
+                  (click)="selectTime(slot.startTime)"
+                  class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  [class.bg-indigo-600]="isTimeSelected(slot.startTime)"
+                  [class.text-white]="isTimeSelected(slot.startTime)"
+                  [class.hover:bg-indigo-700]="isTimeSelected(slot.startTime)"
+                  [class.bg-white]="!isTimeSelected(slot.startTime)"
+                  [class.text-gray-900]="!isTimeSelected(slot.startTime)"
+                  [class.border]="!isTimeSelected(slot.startTime)"
+                  [class.border-gray-300]="!isTimeSelected(slot.startTime)"
+                  [class.hover:border-indigo-500]="!isTimeSelected(slot.startTime)"
+                  [class.hover:bg-indigo-50]="!isTimeSelected(slot.startTime)"
+                >
+                  {{ slot.startTime }}
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="text-center py-8 bg-gray-50 rounded-lg">
+              <svg class="mx-auto h-12 w-12 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="mt-2 text-sm text-gray-600">No available time slots for this date</p>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-8 bg-gray-50 rounded-lg">
+          <svg class="mx-auto h-12 w-12 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="mt-2 text-sm text-gray-600">Please select a date to see available times</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,120 @@
+<div>
+  <h2 class="text-2xl font-semibold text-gray-900 mb-2">Your Information</h2>
+  <p class="text-gray-600 mb-6">Please verify your contact details</p>
+
+  <form [formGroup]="formGroup()" class="space-y-6">
+    <!-- Name Fields -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div>
+        <label for="firstName" class="block text-sm font-medium text-gray-700">
+          First name
+        </label>
+        <div class="mt-1">
+          <input
+            type="text"
+            id="firstName"
+            formControlName="firstName"
+            autocomplete="given-name"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            [class.border-red-500]="firstName?.invalid && firstName?.touched"
+          >
+          @if (getErrorMessage('firstName')) {
+            <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('firstName') }}</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label for="lastName" class="block text-sm font-medium text-gray-700">
+          Last name
+        </label>
+        <div class="mt-1">
+          <input
+            type="text"
+            id="lastName"
+            formControlName="lastName"
+            autocomplete="family-name"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            [class.border-red-500]="lastName?.invalid && lastName?.touched"
+          >
+          @if (getErrorMessage('lastName')) {
+            <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('lastName') }}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700">
+        Email address
+      </label>
+      <div class="mt-1">
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          autocomplete="email"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          [class.border-red-500]="email?.invalid && email?.touched"
+        >
+        @if (getErrorMessage('email')) {
+          <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('email') }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div>
+      <label for="phone" class="block text-sm font-medium text-gray-700">
+        Phone number
+      </label>
+      <div class="mt-1">
+        <input
+          type="tel"
+          id="phone"
+          formControlName="phone"
+          autocomplete="tel"
+          placeholder="+1 (555) 123-4567"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          [class.border-red-500]="phone?.invalid && phone?.touched"
+        >
+        @if (getErrorMessage('phone')) {
+          <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('phone') }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label for="notes" class="block text-sm font-medium text-gray-700">
+        Additional notes (optional)
+      </label>
+      <div class="mt-1">
+        <textarea
+          id="notes"
+          formControlName="notes"
+          rows="3"
+          placeholder="Any special requests or information we should know?"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Privacy Notice -->
+    <div class="rounded-md bg-blue-50 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400 fill-current" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            Your information will be used only for booking purposes and will be kept confidential.
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

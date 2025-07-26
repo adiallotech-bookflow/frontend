@@ -1,0 +1,112 @@
+<div>
+  <div class="px-4 sm:px-0">
+    <h3 class="text-base font-semibold leading-7 text-gray-900">Booking Summary</h3>
+    <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Please review your appointment details before confirming.</p>
+  </div>
+
+  <div class="mt-6 border-t border-gray-100">
+    <dl class="divide-y divide-gray-100">
+      <!-- Service Information -->
+      @if (bookingData().service) {
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Service</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ bookingData().service!.name }}</dd>
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Duration</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ bookingData().service!.duration }} minutes</dd>
+        </div>
+      }
+
+      <!-- Professional -->
+      @if (bookingData().professional) {
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Professional</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+            <div class="flex items-center">
+              <img
+                [src]="bookingData().professional!.avatar"
+                [alt]="bookingData().professional!.name"
+                class="h-10 w-10 rounded-full mr-3"
+              >
+              <div>
+                <div class="font-medium text-gray-900">{{ bookingData().professional!.name }}</div>
+                <div class="text-gray-500">{{ bookingData().professional!.title }}</div>
+              </div>
+            </div>
+          </dd>
+        </div>
+      }
+
+      <!-- Date & Time -->
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Date</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ formatDate(bookingData().date) }}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Time</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ formatTime(bookingData().time) }}</dd>
+      </div>
+
+      <!-- Contact Information -->
+      @if (bookingData().details) {
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Full name</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+            {{ bookingData().details!.firstName }} {{ bookingData().details!.lastName }}
+          </dd>
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Email address</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ bookingData().details!.email }}</dd>
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-gray-900">Phone number</dt>
+          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ bookingData().details!.phone }}</dd>
+        </div>
+        @if (bookingData().details!.notes) {
+          <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+            <dt class="text-sm font-medium leading-6 text-gray-900">Additional notes</dt>
+            <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ bookingData().details!.notes }}</dd>
+          </div>
+        }
+      }
+
+      <!-- Total Price -->
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Total amount</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+          <span class="text-lg font-semibold text-gray-900">${{ getTotalPrice() }}</span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Actions -->
+  <div class="mt-10 flex items-center justify-end gap-x-6">
+    <button
+      type="button"
+      (click)="onGoBack()"
+      class="text-sm font-semibold leading-6 text-gray-900 hover:text-gray-700"
+    >
+      Go back
+    </button>
+    <button
+      type="button"
+      (click)="onConfirm()"
+      class="rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+    >
+      Confirm booking
+    </button>
+  </div>
+
+  <!-- Terms Notice -->
+  <div class="mt-6 text-center">
+    <p class="text-xs text-gray-500">
+      By confirming this booking, you agree to our
+      <a href="#" class="text-indigo-600 hover:text-indigo-500">terms and conditions</a>
+      and
+      <a href="#" class="text-indigo-600 hover:text-indigo-500">cancellation policy</a>.
+    </p>
+  </div>
+</div>

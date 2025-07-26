@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Book an Appointment</h1>
+
+    <!-- Step Indicators -->
+    <nav aria-label="Progress" class="mb-8">
+      <ol role="list" class="space-y-4 md:flex md:space-x-8 md:space-y-0">
+        @for (step of steps(); track step.id) {
+          <li class="md:flex-1">
+            <button
+              type="button"
+              (click)="goToStep($any(step.name))"
+              [disabled]="!step.completed && !step.active"
+              [attr.aria-current]="step.active ? 'step' : null"
+              class="group flex flex-col py-2 pl-4 md:pb-0 md:pl-0 md:pt-4 w-full text-left"
+              [class.border-l-4]="true"
+              [class.md:border-l-0]="true"
+              [class.md:border-t-4]="true"
+              [class.border-indigo-600]="step.completed || step.active"
+              [class.hover:border-indigo-800]="step.completed || step.active"
+              [class.border-gray-200]="!step.completed && !step.active"
+              [class.hover:border-gray-300]="!step.completed && !step.active"
+            >
+              <span 
+                class="text-sm font-medium"
+                [class.text-indigo-600]="step.completed || step.active"
+                [class.group-hover:text-indigo-800]="step.completed || step.active"
+                [class.text-gray-500]="!step.completed && !step.active"
+                [class.group-hover:text-gray-700]="!step.completed && !step.active"
+              >
+                Step {{ step.id }}
+              </span>
+              <span class="text-sm font-medium">{{ step.label }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <!-- Form Steps -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <div class="animate-fadeIn">
+        @switch (currentStep()) {
+          @case ('service') {
+            <app-service-step
+              [selectedService]="formData().service"
+              (serviceSelected)="updateFormData('service', $event)"
+            />
+          }
+          @case ('professional') {
+            <app-professional-step
+              [selectedService]="formData().service!"
+              [selectedProfessional]="formData().professional"
+              (professionalSelected)="updateFormData('professional', $event)"
+            />
+          }
+          @case ('datetime') {
+            <app-datetime-step
+              [selectedProfessional]="formData().professional!"
+              [selectedDate]="formData().date"
+              [selectedTime]="formData().time"
+              (datetimeSelected)="updateFormData('datetime', $event)"
+            />
+          }
+          @case ('details') {
+            <app-details-step
+              [formGroup]="$any(bookingForm.get('details'))"
+              (detailsUpdated)="updateFormData('details', $event)"
+            />
+          }
+          @case ('summary') {
+            <app-booking-summary
+              [bookingData]="formData()"
+              (confirmBooking)="confirmBooking()"
+              (goBack)="previousStep()"
+            />
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    @if (currentStep() !== 'summary') {
+      <div class="flex justify-between">
+        <button
+          type="button"
+          (click)="previousStep()"
+          [disabled]="!canGoBack()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          <svg class="mr-2 -ml-1 h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+
+        <button
+          type="button"
+          (click)="nextStep()"
+          [disabled]="!canGoNext()"
+          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          Next
+          <svg class="ml-2 -mr-1 h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+</div>

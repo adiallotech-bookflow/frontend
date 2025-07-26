@@ -20,6 +20,11 @@ export const routes: Routes = [
         path: 'calendar',
         loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar),
         title: 'Calendar - BookFlow'
+      },
+      {
+        path: 'booking',
+        loadComponent: () => import('./features/booking/booking').then(m => m.Booking),
+        title: 'Book Appointment - BookFlow'
       }
     ]
   }
