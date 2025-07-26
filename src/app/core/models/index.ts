@@ -4,3 +4,4 @@ export * from './professional.model';
 export * from './time-slot.model';
 export * from './calendar';
 export * from './booking';
+export * from './dashboard';

@@ -14,7 +14,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
-        title: 'Dashboard - BookFlow'
+        title: 'My Dashboard - BookFlow'
       },
       {
         path: 'calendar',
