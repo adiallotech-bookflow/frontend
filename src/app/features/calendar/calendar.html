@@ -1,1 +1,201 @@
-<p>calendar works!</p>
+<div class="lg:flex lg:h-full lg:flex-col">
+  <header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none">
+    <h1 class="text-base font-semibold text-gray-900">
+      <time [attr.datetime]="calendarMonth().year + '-' + (calendarMonth().month + 1)">
+        {{ calendarMonth().name }}
+      </time>
+    </h1>
+    <div class="flex items-center">
+      <div class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch">
+        <button
+          type="button"
+          (click)="navigateToPreviousMonth()"
+          class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"
+        >
+          <span class="sr-only">Previous month</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true" class="size-5 fill-current">
+            <path d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" fill-rule="evenodd" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          (click)="navigateToToday()"
+          class="hidden border-y border-gray-300 px-3.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:relative md:block"
+        >
+          Today
+        </button>
+        <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden"></span>
+        <button
+          type="button"
+          (click)="navigateToNextMonth()"
+          class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50"
+        >
+          <span class="sr-only">Next month</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true" class="size-5 fill-current">
+            <path d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shadow ring-1 ring-black/5 lg:flex lg:flex-auto lg:flex-col" [@slideAnimation]="calendarMonth().month">
+    <div class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs/6 font-semibold text-gray-700 lg:flex-none">
+      @for (day of weekDaysShort; track day; let i = $index) {
+        <div class="flex justify-center bg-white py-2">
+          <span>{{ day }}</span>
+          <span class="sr-only sm:not-sr-only">{{ weekDaysFull[i].substring(1) }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="flex bg-gray-200 text-xs/6 text-gray-700 lg:flex-auto">
+      <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px">
+        @for (week of calendarMonth().weeks; track week.weekNumber) {
+          @for (day of week.days; track day.date) {
+            <div
+              (click)="selectDate(day)"
+              [attr.data-is-current-month]="day.isCurrentMonth ? '' : null"
+              [attr.data-is-today]="day.isToday ? '' : null"
+              class="relative bg-gray-50 px-3 py-2 text-gray-500 data-[is-current-month]:bg-white"
+              [class.cursor-pointer]="day.isAvailable && day.isCurrentMonth"
+              [class.hover:bg-gray-100]="day.isAvailable && day.isCurrentMonth"
+            >
+              <time
+                [attr.datetime]="day.date | date:'yyyy-MM-dd'"
+                class="[[data-is-today]_&]:flex [[data-is-today]_&]:size-6 [[data-is-today]_&]:items-center [[data-is-today]_&]:justify-center [[data-is-today]_&]:rounded-full [[data-is-today]_&]:bg-indigo-600 [[data-is-today]_&]:font-semibold [[data-is-today]_&]:text-white"
+                [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+              >
+                {{ day.dayNumber }}
+              </time>
+
+              @if (day.isAvailable && day.isCurrentMonth) {
+                <div class="mt-2">
+                  <div class="text-xs">
+                    <span class="font-medium text-green-700">{{ getAvailableSlotCount(day) }} slots</span>
+                  </div>
+                </div>
+              }
+
+              @if (!day.isAvailable && day.isCurrentMonth && !day.isWeekend) {
+                <div class="mt-2">
+                  <div class="text-xs text-red-600 font-medium">Fully booked</div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Mobile view -->
+      <div class="isolate grid w-full grid-cols-7 grid-rows-6 gap-px lg:hidden">
+        @for (week of calendarMonth().weeks; track week.weekNumber) {
+          @for (day of week.days; track day.date) {
+            <button
+              type="button"
+              (click)="selectDate(day)"
+              [attr.data-is-current-month]="day.isCurrentMonth ? '' : null"
+              [attr.data-is-today]="day.isToday ? '' : null"
+              [disabled]="!day.isCurrentMonth"
+              class="flex h-14 flex-col bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 focus:z-10 data-[is-current-month]:bg-white"
+            >
+              <time
+                [attr.datetime]="day.date | date:'yyyy-MM-dd'"
+                class="ml-auto [[data-is-today]_&]:flex [[data-is-today]_&]:size-6 [[data-is-today]_&]:items-center [[data-is-today]_&]:justify-center [[data-is-today]_&]:rounded-full [[data-is-today]_&]:bg-indigo-600 [[data-is-today]_&]:font-semibold [[data-is-today]_&]:text-white"
+                [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+              >
+                {{ day.dayNumber }}
+              </time>
+              @if (day.isAvailable && day.isCurrentMonth) {
+                <span class="sr-only">{{ getAvailableSlotCount(day) }} slots available</span>
+                <span class="-mx-0.5 mt-auto flex flex-wrap-reverse">
+                  <span class="mx-0.5 mb-1 h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                </span>
+              }
+              @if (!day.isAvailable && day.isCurrentMonth && !day.isWeekend) {
+                <span class="sr-only">Fully booked</span>
+                <span class="-mx-0.5 mt-auto flex flex-wrap-reverse">
+                  <span class="mx-0.5 mb-1 h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                </span>
+              }
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Day Details Modal -->
+  @if (showDayDetails()) {
+    <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="fixed inset-0 bg-gray-500/75 transition-opacity"></div>
+
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div
+            class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+              <button
+                type="button"
+                (click)="closeDayDetails()"
+                class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span class="sr-only">Close</span>
+                <svg class="size-6 fill-current" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">
+                  Available Time Slots
+                </h3>
+                @if (selectedDayAvailability()) {
+                  <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                      {{ selectedDayAvailability()!.date | date:'EEEE, MMMM d, y' }}
+                    </p>
+                  </div>
+
+                  <div class="mt-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
+                    @for (slot of selectedDayAvailability()!.timeSlots; track slot.startTime) {
+                      <button
+                        type="button"
+                        [disabled]="!slot.isAvailable"
+                        class="rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset"
+                        [class.bg-white]="slot.isAvailable"
+                        [class.text-gray-900]="slot.isAvailable"
+                        [class.ring-gray-300]="slot.isAvailable"
+                        [class.hover:bg-gray-50]="slot.isAvailable"
+                        [class.bg-gray-100]="!slot.isAvailable"
+                        [class.text-gray-400]="!slot.isAvailable"
+                        [class.ring-gray-200]="!slot.isAvailable"
+                        [class.cursor-not-allowed]="!slot.isAvailable"
+                      >
+                        {{ slot.startTime }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+              <button
+                type="button"
+                (click)="closeDayDetails()"
+                class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
