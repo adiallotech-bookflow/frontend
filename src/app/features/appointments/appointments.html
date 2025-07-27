@@ -1,0 +1,167 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">My Appointments</h1>
+      <p class="mt-2 text-gray-600">Manage and track all your appointments</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-600">Total Appointments</p>
+        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats().total }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-600">Upcoming</p>
+        <p class="mt-2 text-3xl font-bold text-blue-600">{{ stats().upcoming }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-600">Completed</p>
+        <p class="mt-2 text-3xl font-bold text-green-600">{{ stats().completed }}</p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-600">Cancelled</p>
+        <p class="mt-2 text-3xl font-bold text-red-600">{{ stats().cancelled }}</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search -->
+        <div>
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <input
+            type="text"
+            id="search"
+            placeholder="Search by service or professional..."
+            [value]="searchTerm()"
+            (input)="searchTerm.set($any($event.target).value)"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select
+            id="status"
+            (change)="updateFilter({ status: $any($event.target).value })"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="all">All Status</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div>
+          <label for="dateRange" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+          <select
+            id="dateRange"
+            (change)="updateFilter({ dateRange: $any($event.target).value })"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="all">All Time</option>
+            <option value="this-week">This Week</option>
+            <option value="this-month">This Month</option>
+            <option value="last-month">Last Month</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="space-y-4" [@listAnimation]="filteredAppointments().length">
+      @for (appointment of filteredAppointments(); track appointment.id) {
+        <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+          <div class="p-6">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start space-x-4">
+                <!-- Professional Avatar -->
+                <img
+                  [src]="appointment.professionalAvatar"
+                  [alt]="appointment.professional"
+                  class="w-12 h-12 rounded-full"
+                />
+                
+                <!-- Appointment Details -->
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                  <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
+                  
+                  <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                    <span class="flex items-center">
+                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {{ formatDate(appointment.date) }}
+                    </span>
+                    <span class="flex items-center">
+                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {{ appointment.time }} - {{ appointment.endTime }}
+                    </span>
+                    <span class="flex items-center">
+                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {{ appointment.location }}
+                    </span>
+                  </div>
+
+                  @if (appointment.notes) {
+                    <p class="mt-3 text-sm text-gray-600 italic">{{ appointment.notes }}</p>
+                  }
+                </div>
+              </div>
+
+              <!-- Right side: Status and Actions -->
+              <div class="flex flex-col items-end space-y-3">
+                <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
+                  {{ appointment.status }}
+                </span>
+                
+                <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+                
+                @if (appointment.status === 'upcoming') {
+                  <div class="flex space-x-2">
+                    <button
+                      type="button"
+                      class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                    >
+                      Reschedule
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button
+                      type="button"
+                      (click)="cancelAppointment(appointment.id)"
+                      class="text-sm text-red-600 hover:text-red-500 font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      
+      @if (filteredAppointments().length === 0) {
+        <div class="bg-white rounded-lg shadow p-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No appointments found</h3>
+          <p class="mt-1 text-sm text-gray-500">Try adjusting your filters or search terms.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

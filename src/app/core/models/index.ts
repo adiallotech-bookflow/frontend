@@ -6,3 +6,6 @@ export * from './calendar';
 export * from './booking';
 export * from './dashboard';
 export * from './calendar-booking';
+export * from './appointments';
+export * from './mock';
+export * from './mock-extended';
