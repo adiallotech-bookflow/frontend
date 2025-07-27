@@ -39,10 +39,10 @@ export class Appointments implements OnInit {
     completed: 0,
     cancelled: 0
   });
-  
+
   // Loading state
   isLoading = signal(true);
-  
+
   // Reschedule state
   showReschedulePanel = signal(false);
   appointmentToReschedule = signal<AppointmentDetails | null>(null);
@@ -59,7 +59,7 @@ export class Appointments implements OnInit {
       }
 
       // Search filter
-      if (search && !appointment.service.toLowerCase().includes(search) && 
+      if (search && !appointment.service.toLowerCase().includes(search) &&
           !appointment.professional.toLowerCase().includes(search)) {
         return false;
       }
@@ -68,7 +68,7 @@ export class Appointments implements OnInit {
       if (currentFilter.dateRange && currentFilter.dateRange !== 'all') {
         const appointmentDate = new Date(appointment.date);
         const now = new Date();
-        
+
         switch (currentFilter.dateRange) {
           case 'this-week':
             const weekStart = new Date(now);
@@ -76,15 +76,15 @@ export class Appointments implements OnInit {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
             return appointmentDate >= weekStart && appointmentDate <= weekEnd;
-          
+
           case 'this-month':
-            return appointmentDate.getMonth() === now.getMonth() && 
+            return appointmentDate.getMonth() === now.getMonth() &&
                    appointmentDate.getFullYear() === now.getFullYear();
-          
+
           case 'last-month':
             const lastMonth = new Date(now);
             lastMonth.setMonth(now.getMonth() - 1);
-            return appointmentDate.getMonth() === lastMonth.getMonth() && 
+            return appointmentDate.getMonth() === lastMonth.getMonth() &&
                    appointmentDate.getFullYear() === lastMonth.getFullYear();
         }
       }
@@ -124,14 +124,14 @@ export class Appointments implements OnInit {
       const dateA = new Date(a.date);
       const [hoursA, minutesA] = a.time.split(':').map(Number);
       dateA.setHours(hoursA, minutesA);
-      
+
       const dateB = new Date(b.date);
       const [hoursB, minutesB] = b.time.split(':').map(Number);
       dateB.setHours(hoursB, minutesB);
-      
+
       return dateA.getTime() - dateB.getTime();
     };
-    
+
     groups.upcoming.sort(sortByDateTime);
     groups.completed.sort(sortByDateTime);
     groups.cancelled.sort(sortByDateTime);
@@ -176,7 +176,7 @@ export class Appointments implements OnInit {
     }
 
     appointmentsObservable.pipe(
-      map(appointments => 
+      map(appointments =>
         appointments.map(apt => {
           // Parse the date properly - apt.date is already an ISO string
           const appointmentDate = new Date(apt.date);
@@ -184,7 +184,7 @@ export class Appointments implements OnInit {
           const startTime = new Date(appointmentDate);
           startTime.setHours(hours, minutes, 0, 0);
           const endTime = new Date(startTime.getTime() + apt.duration * 60000);
-          
+
           // Map status to AppointmentDetails status type
           let status: AppointmentDetails['status'];
           switch (apt.status) {
@@ -201,7 +201,7 @@ export class Appointments implements OnInit {
             default:
               status = 'upcoming';
           }
-          
+
           // Map to AppointmentDetails interface
           const appointmentDetails: AppointmentDetails = {
             id: apt.id,
@@ -219,7 +219,7 @@ export class Appointments implements OnInit {
             notes: apt.notes,
             createdAt: new Date() // We don't have created date in the mock
           };
-          
+
           return appointmentDetails;
         })
       )
@@ -325,27 +325,38 @@ export class Appointments implements OnInit {
     const appointment = this.appointments().find(apt => apt.id === appointmentId);
     if (!appointment) return;
 
-    // In a real application, this would call an API
-    // For now, we'll update the local state
-    this.appointments.update(appointments =>
-      appointments.map(apt =>
-        apt.id === appointmentId
-          ? {
-              ...apt,
-              date: new Date(newSchedule.date),
-              time: newSchedule.time,
-              // Calculate new end time
-              endTime: this.calculateEndTime(newSchedule.time, apt.duration)
-            }
-          : apt
-      )
-    );
+    // Call the service to persist the change
+    this.appointmentsService.rescheduleAppointment(appointmentId, newSchedule).subscribe({
+      next: () => {
+        // Update local state with the response
+        this.appointments.update(appointments =>
+          appointments.map(apt =>
+            apt.id === appointmentId
+              ? {
+                  ...apt,
+                  date: new Date(newSchedule.date),
+                  time: newSchedule.time,
+                  // Calculate new end time
+                  endTime: this.calculateEndTime(newSchedule.time, apt.duration)
+                }
+              : apt
+          )
+        );
 
-    // Close the panel
-    this.closeReschedulePanel();
+        // Close the panel
+        this.closeReschedulePanel();
 
-    // Show success notification (in a real app)
-    console.log('Appointment rescheduled successfully');
+        // Show success notification
+        console.log('Appointment rescheduled successfully');
+
+        // Reload stats to reflect any changes
+        this.loadStats();
+      },
+      error: (error) => {
+        console.error('Error rescheduling appointment:', error);
+        // In a real app, show error notification to user
+      }
+    });
   }
 
   private calculateEndTime(startTime: string, duration: number): string {

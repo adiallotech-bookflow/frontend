@@ -28,17 +28,74 @@
     
     <!-- Date Selection -->
     <div class="mb-4">
-      <label for="reschedule-date" class="block text-sm font-medium text-gray-700 mb-2">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
         New Date
       </label>
-      <input
-        type="date"
-        id="reschedule-date"
-        [value]="selectedDate()"
-        (change)="selectedDate.set($any($event.target).value)"
-        [min]="getTodayDate()"
-        class="block w-full rounded-md border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-      />
+      
+      <!-- Month and Year Header -->
+      <div class="flex items-center justify-between mb-3">
+        <button
+          type="button"
+          (click)="previousMonth()"
+          class="p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <h3 class="text-sm font-semibold text-gray-900">
+          {{ getMonthYearDisplay() }}
+        </h3>
+        
+        <button
+          type="button"
+          (click)="nextMonth()"
+          class="p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Calendar Grid -->
+      <div class="bg-white border border-gray-200 rounded-lg p-3">
+        <!-- Days of Week -->
+        <div class="grid grid-cols-7 mb-2">
+          @for (day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track day) {
+            <div class="text-center text-xs font-medium text-gray-500 py-1">
+              {{ day }}
+            </div>
+          }
+        </div>
+        
+        <!-- Calendar Days -->
+        <div class="grid grid-cols-7 gap-1">
+          @for (day of calendarDays(); track day.date) {
+            <button
+              type="button"
+              [disabled]="!day.isSelectable"
+              (click)="selectDate(day)"
+              class="relative h-8 w-full rounded-lg text-sm transition-all"
+              [class.bg-indigo-600]="isSelectedDate(day)"
+              [class.text-white]="isSelectedDate(day)"
+              [class.hover:bg-indigo-500]="isSelectedDate(day) && day.isSelectable"
+              [class.bg-gray-50]="!day.isCurrentMonth && !isSelectedDate(day)"
+              [class.text-gray-400]="!day.isCurrentMonth || !day.isSelectable"
+              [class.text-gray-900]="day.isCurrentMonth && day.isSelectable && !isSelectedDate(day)"
+              [class.hover:bg-gray-100]="!isSelectedDate(day) && day.isSelectable"
+              [class.cursor-not-allowed]="!day.isSelectable"
+              [class.font-semibold]="day.isToday"
+            >
+              {{ day.day }}
+              @if (day.isToday) {
+                <div class="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full" [class.bg-white]="isSelectedDate(day)"></div>
+              }
+            </button>
+          }
+        </div>
+      </div>
     </div>
 
     <!-- Time Selection -->

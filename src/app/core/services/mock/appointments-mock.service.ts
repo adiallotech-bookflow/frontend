@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { MockBaseService } from './mock-base.service';
 import { MockDataGenerator } from './mock-data.generator';
-import { Customer, AppointmentFormData, AppointmentExtended, ProfessionalExtended, TimeSlotAvailability, Service } from '../../models';
+import { Customer, AppointmentFormData, AppointmentExtended, ProfessionalExtended, Service } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -96,10 +96,6 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     return this.getAllFromMockData() as Observable<AppointmentExtended[]>;
   }
 
-  getAppointmentById(id: string): Observable<AppointmentExtended> {
-    return this.getByIdFromMockData(id);
-  }
-
   getAppointmentsByProfessional(professionalId: string): Observable<AppointmentExtended[]> {
     return this.simulateDelay().pipe(
       map(() => {
@@ -114,18 +110,6 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
       map(() => {
         const appointments = this.getStoredData() || [];
         return appointments.filter(apt => apt.customerId === customerId);
-      })
-    );
-  }
-
-  getAppointmentsByDateRange(startDate: Date, endDate: Date): Observable<AppointmentExtended[]> {
-    return this.simulateDelay().pipe(
-      map(() => {
-        const appointments = this.getStoredData() || [];
-        return appointments.filter(apt => {
-          const aptDate = new Date(apt.date);
-          return aptDate >= startDate && aptDate <= endDate;
-        });
       })
     );
   }
@@ -160,80 +144,22 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     return this.addToMockData(appointment);
   }
 
-  updateAppointment(id: string, updates: Partial<AppointmentExtended>): Observable<AppointmentExtended> {
-    return this.updateInMockData(id, updates);
-  }
-
   cancelAppointment(id: string): Observable<AppointmentExtended> {
     return this.updateInMockData(id, { status: 'cancelled' });
   }
 
-  confirmAppointment(id: string): Observable<AppointmentExtended> {
-    return this.updateInMockData(id, { status: 'confirmed' });
-  }
-
-  completeAppointment(id: string): Observable<AppointmentExtended> {
-    return this.updateInMockData(id, { status: 'completed' });
-  }
-
-  deleteAppointment(id: string): Observable<boolean> {
-    return this.deleteFromMockData(id);
-  }
-
-  searchAppointments(searchTerm: string): Observable<AppointmentExtended[]> {
-    return this.searchInMockData(
-      searchTerm,
-      ['customerName', 'professionalName', 'service', 'notes']
-    ) as Observable<AppointmentExtended[]>;
-  }
-
-  getAvailableTimeSlots(professionalId: string, date: Date): Observable<TimeSlotAvailability[]> {
-    return this.simulateDelay().pipe(
-      switchMap(() => this.getAppointmentsByProfessional(professionalId)),
-      map(appointments => {
-        const dateStr = date.toISOString().split('T')[0];
-        const bookedSlots = appointments
-          .filter(apt => apt.date.startsWith(dateStr))
-          .map(apt => apt.time);
-
-        const slots: TimeSlotAvailability[] = [];
-        for (let hour = 9; hour < 18; hour++) {
-          for (let minute = 0; minute < 60; minute += 30) {
-            const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-            const isBooked = bookedSlots.includes(time);
-
-            const slot = MockDataGenerator.generateTimeSlot(date, hour, minute);
-            slot.available = !isBooked;
-            slots.push(slot);
-          }
-        }
-
-        return slots;
-      })
-    );
+  rescheduleAppointment(id: string, newSchedule: { date: string; time: string }): Observable<AppointmentExtended> {
+    const startTime = new Date(newSchedule.date + 'T' + newSchedule.time);
+    return this.updateInMockData(id, {
+      date: newSchedule.date,
+      time: newSchedule.time,
+      startTime: startTime
+    });
   }
 
   getProfessionals(): Observable<ProfessionalExtended[]> {
     return this.simulateDelay().pipe(
       map(() => this.professionals)
-    );
-  }
-
-  getProfessionalById(id: string): Observable<ProfessionalExtended | undefined> {
-    return this.simulateDelay().pipe(
-      map(() => this.professionals.find(p => p.id === id))
-    );
-  }
-
-  getCustomers(): Observable<Customer[]> {
-    return this.simulateDelay().pipe(
-      map(() => this.customers)
-    );
-  }
-
-  getCustomerById(id: string): Observable<Customer | undefined> {
-    return this.simulateDelay().pipe(
-      map(() => this.customers.find(c => c.id === id))
     );
   }
 
@@ -283,7 +209,7 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     );
   }
 
-  regenerateAllData(): void {
+/*  regenerateAllData(): void {
     // Clear all stored data
     localStorage.removeItem(this.storageKey);
     localStorage.removeItem(this.professionalsStorageKey);
@@ -291,7 +217,7 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
 
     // Regenerate fresh data
     this.initializeMockData();
-  }
+  }*/
 
   getDashboardStats(userId?: string, userRole?: 'admin' | 'professional' | 'customer'): Observable<{
     totalAppointments: number;
