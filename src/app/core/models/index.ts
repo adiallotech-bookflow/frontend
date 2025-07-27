@@ -9,3 +9,5 @@ export * from './calendar-booking';
 export * from './appointments';
 export * from './mock';
 export * from './mock-extended';
+export * from './auth/user.model';
+export * from './auth/auth';
