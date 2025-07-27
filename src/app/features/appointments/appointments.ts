@@ -120,23 +120,21 @@ export class Appointments implements OnInit {
     });
 
     // Sort appointments within each group by date
-    groups.upcoming.sort((a, b) => {
-      const dateA = new Date(a.date + 'T' + a.time);
-      const dateB = new Date(b.date + 'T' + b.time);
+    const sortByDateTime = (a: AppointmentDetails, b: AppointmentDetails) => {
+      const dateA = new Date(a.date);
+      const [hoursA, minutesA] = a.time.split(':').map(Number);
+      dateA.setHours(hoursA, minutesA);
+      
+      const dateB = new Date(b.date);
+      const [hoursB, minutesB] = b.time.split(':').map(Number);
+      dateB.setHours(hoursB, minutesB);
+      
       return dateA.getTime() - dateB.getTime();
-    });
+    };
     
-    groups.completed.sort((a, b) => {
-      const dateA = new Date(a.date + 'T' + a.time);
-      const dateB = new Date(b.date + 'T' + b.time);
-      return dateA.getTime() - dateB.getTime();
-    });
-    
-    groups.cancelled.sort((a, b) => {
-      const dateA = new Date(a.date + 'T' + a.time);
-      const dateB = new Date(b.date + 'T' + b.time);
-      return dateA.getTime() - dateB.getTime();
-    });
+    groups.upcoming.sort(sortByDateTime);
+    groups.completed.sort(sortByDateTime);
+    groups.cancelled.sort(sortByDateTime);
 
     return groups;
   });
@@ -180,7 +178,11 @@ export class Appointments implements OnInit {
     appointmentsObservable.pipe(
       map(appointments => 
         appointments.map(apt => {
-          const startTime = new Date(apt.date + 'T' + apt.time);
+          // Parse the date properly - apt.date is already an ISO string
+          const appointmentDate = new Date(apt.date);
+          const [hours, minutes] = apt.time.split(':').map(Number);
+          const startTime = new Date(appointmentDate);
+          startTime.setHours(hours, minutes, 0, 0);
           const endTime = new Date(startTime.getTime() + apt.duration * 60000);
           
           // Map status to AppointmentDetails status type
