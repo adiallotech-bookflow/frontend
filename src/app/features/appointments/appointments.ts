@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppointmentDetails, AppointmentFilter, AppointmentStats } from '../../core/models';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
   imports: [CommonModule],
   templateUrl: './appointments.html',
   styleUrl: './appointments.css',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   animations: [
     trigger('listAnimation', [
       transition('* <=> *', [
@@ -228,5 +229,29 @@ export class Appointments implements OnInit {
       day: 'numeric',
       year: 'numeric'
     });
+  }
+
+  getStatusLabel(status: string | undefined): string {
+    switch (status) {
+      case 'all': return 'All Status';
+      case 'upcoming': return 'Upcoming';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return 'All Status';
+    }
+  }
+
+  getDateRangeLabel(dateRange: string | undefined): string {
+    switch (dateRange) {
+      case 'all': return 'All Time';
+      case 'this-week': return 'This Week';
+      case 'this-month': return 'This Month';
+      case 'last-month': return 'Last Month';
+      default: return 'All Time';
+    }
+  }
+
+  filters() {
+    return this.filter();
   }
 }

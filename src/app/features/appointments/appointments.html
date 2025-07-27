@@ -45,45 +45,117 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Search -->
         <div>
-          <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
-            type="text"
-            id="search"
-            placeholder="Search by service or professional..."
-            [value]="searchTerm()"
-            (input)="searchTerm.set($any($event.target).value)"
-            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
+          <label for="search" class="block text-sm/6 font-medium text-gray-900">Search</label>
+          <div class="mt-2">
+            <input
+              type="text"
+              id="search"
+              placeholder="Search by service or professional..."
+              [value]="searchTerm()"
+              (input)="searchTerm.set($any($event.target).value)"
+              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            />
+          </div>
         </div>
 
         <!-- Status Filter -->
         <div>
-          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select
-            id="status"
-            (change)="updateFilter({ status: $any($event.target).value })"
-            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="all">All Status</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <label for="status" class="block text-sm/6 font-medium text-gray-900">Status</label>
+          <el-select id="status" name="status" [value]="filters().status" (change)="updateFilter({ status: $any($event.target).value })" class="mt-2 block">
+            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
+              <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-6">
+                <span class="block truncate">{{ getStatusLabel(filters().status) }}</span>
+              </el-selectedcontent>
+              <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4">
+                <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+              </svg>
+            </button>
+
+            <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white p-0 py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
+              <el-option value="all" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">All Status</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="upcoming" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Upcoming</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="completed" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Completed</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="cancelled" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Cancelled</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+            </el-options>
+          </el-select>
         </div>
 
         <!-- Date Range Filter -->
         <div>
-          <label for="dateRange" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-          <select
-            id="dateRange"
-            (change)="updateFilter({ dateRange: $any($event.target).value })"
-            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="all">All Time</option>
-            <option value="this-week">This Week</option>
-            <option value="this-month">This Month</option>
-            <option value="last-month">Last Month</option>
-          </select>
+          <label for="dateRange" class="block text-sm/6 font-medium text-gray-900">Date Range</label>
+          <el-select id="dateRange" name="dateRange" [value]="filters().dateRange" (change)="updateFilter({ dateRange: $any($event.target).value })" class="mt-2 block">
+            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
+              <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-6">
+                <span class="block truncate">{{ getDateRangeLabel(filters().dateRange) }}</span>
+              </el-selectedcontent>
+              <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 sm:size-4">
+                <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+              </svg>
+            </button>
+
+            <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white p-0 py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
+              <el-option value="all" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">All Time</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="this-week" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">This Week</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="this-month" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">This Month</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+              <el-option value="last-month" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+                <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Last Month</span>
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                  </svg>
+                </span>
+              </el-option>
+            </el-options>
+          </el-select>
         </div>
       </div>
     </div>
