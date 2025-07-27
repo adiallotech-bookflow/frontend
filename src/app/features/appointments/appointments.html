@@ -219,6 +219,7 @@
                   <div class="flex space-x-2">
                     <button
                       type="button"
+                      (click)="openReschedulePanel(appointment)"
                       class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
                     >
                       Reschedule
@@ -252,3 +253,15 @@
     }
   </div>
 </div>
+
+<app-slideover
+  [isOpen]="showReschedulePanel()"
+  [title]="'Reschedule Appointment'"
+  (close)="closeReschedulePanel()"
+>
+  <app-reschedule-appointment
+    [appointment]="appointmentToReschedule()"
+    (reschedule)="rescheduleAppointment(appointmentToReschedule()!.id, $event)"
+    (cancel)="closeReschedulePanel()"
+  ></app-reschedule-appointment>
+</app-slideover>

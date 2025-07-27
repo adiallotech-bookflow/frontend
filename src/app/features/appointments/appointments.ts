@@ -5,10 +5,12 @@ import { animate, query, stagger, style, transition, trigger } from '@angular/an
 import { AppointmentsMockService } from '../../core/services/mock';
 import { AuthService } from '../../core/services/auth.service';
 import { map } from 'rxjs/operators';
+import { SlideoverComponent } from '../../shared/components/slideover/slideover';
+import { RescheduleAppointmentComponent } from './components/reschedule-appointment/reschedule-appointment';
 
 @Component({
   selector: 'app-appointments',
-  imports: [CommonModule],
+  imports: [CommonModule, SlideoverComponent, RescheduleAppointmentComponent],
   templateUrl: './appointments.html',
   styleUrl: './appointments.css',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -40,6 +42,10 @@ export class Appointments implements OnInit {
   
   // Loading state
   isLoading = signal(true);
+  
+  // Reschedule state
+  showReschedulePanel = signal(false);
+  appointmentToReschedule = signal<AppointmentDetails | null>(null);
 
   filteredAppointments = computed(() => {
     const allAppointments = this.appointments();
@@ -253,5 +259,51 @@ export class Appointments implements OnInit {
 
   filters() {
     return this.filter();
+  }
+
+  openReschedulePanel(appointment: AppointmentDetails): void {
+    this.appointmentToReschedule.set(appointment);
+    this.showReschedulePanel.set(true);
+  }
+
+  closeReschedulePanel(): void {
+    this.showReschedulePanel.set(false);
+    this.appointmentToReschedule.set(null);
+  }
+
+  rescheduleAppointment(appointmentId: string, newSchedule: { date: string; time: string }): void {
+    const appointment = this.appointments().find(apt => apt.id === appointmentId);
+    if (!appointment) return;
+
+    // In a real application, this would call an API
+    // For now, we'll update the local state
+    this.appointments.update(appointments =>
+      appointments.map(apt =>
+        apt.id === appointmentId
+          ? {
+              ...apt,
+              date: new Date(newSchedule.date),
+              time: newSchedule.time,
+              // Calculate new end time
+              endTime: this.calculateEndTime(newSchedule.time, apt.duration)
+            }
+          : apt
+      )
+    );
+
+    // Close the panel
+    this.closeReschedulePanel();
+
+    // Show success notification (in a real app)
+    console.log('Appointment rescheduled successfully');
+  }
+
+  private calculateEndTime(startTime: string, duration: number): string {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startMinutes = hours * 60 + minutes;
+    const endMinutes = startMinutes + duration;
+    const endHours = Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
+    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
   }
 }
