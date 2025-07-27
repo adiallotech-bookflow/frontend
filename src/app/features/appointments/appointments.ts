@@ -93,6 +93,54 @@ export class Appointments implements OnInit {
     });
   });
 
+  groupedAppointments = computed(() => {
+    const filtered = this.filteredAppointments();
+    const groups: {
+      upcoming: AppointmentDetails[];
+      completed: AppointmentDetails[];
+      cancelled: AppointmentDetails[];
+    } = {
+      upcoming: [],
+      completed: [],
+      cancelled: []
+    };
+
+    filtered.forEach(appointment => {
+      switch (appointment.status) {
+        case 'upcoming':
+          groups.upcoming.push(appointment);
+          break;
+        case 'completed':
+          groups.completed.push(appointment);
+          break;
+        case 'cancelled':
+          groups.cancelled.push(appointment);
+          break;
+      }
+    });
+
+    // Sort appointments within each group by date
+    groups.upcoming.sort((a, b) => {
+      const dateA = new Date(a.date + 'T' + a.time);
+      const dateB = new Date(b.date + 'T' + b.time);
+      return dateA.getTime() - dateB.getTime();
+    });
+    
+    groups.completed.sort((a, b) => {
+      const dateA = new Date(a.date + 'T' + a.time);
+      const dateB = new Date(b.date + 'T' + b.time);
+      return dateA.getTime() - dateB.getTime();
+    });
+    
+    groups.cancelled.sort((a, b) => {
+      const dateA = new Date(a.date + 'T' + a.time);
+      const dateB = new Date(b.date + 'T' + b.time);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return groups;
+  });
+
 
   ngOnInit(): void {
     this.isLoading.set(true);

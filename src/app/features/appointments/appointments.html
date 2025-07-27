@@ -161,81 +161,240 @@
     </div>
 
     <!-- Appointments List -->
-    <div class="space-y-4" [@listAnimation]="filteredAppointments().length">
-      @for (appointment of filteredAppointments(); track appointment.id) {
-        <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-          <div class="p-6">
-            <div class="flex items-start justify-between">
-              <div class="flex items-start space-x-4">
-                <!-- Professional Avatar -->
-                <img
-                  [src]="appointment.professionalAvatar"
-                  [alt]="appointment.professional"
-                  class="w-12 h-12 rounded-full"
-                />
+    <div class="space-y-8">
+      <!-- Upcoming Appointments -->
+      @if (groupedAppointments().upcoming.length > 0) {
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-3">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4l3 3a1 1 0 001.414-1.414L11 9.414V6z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            Upcoming Appointments ({{ groupedAppointments().upcoming.length }})
+          </h2>
+          <div class="space-y-4" [@listAnimation]="groupedAppointments().upcoming.length">
+            @for (appointment of groupedAppointments().upcoming; track appointment.id) {
+              <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                <div class="p-6">
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-start space-x-4">
+                      <!-- Professional Avatar -->
+                      <img
+                        [src]="appointment.professionalAvatar"
+                        [alt]="appointment.professional"
+                        class="w-12 h-12 rounded-full"
+                      />
 
-                <!-- Appointment Details -->
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
-                  <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
+                      <!-- Appointment Details -->
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
 
-                  <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                    <span class="flex items-center">
-                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {{ formatDate(appointment.date) }}
-                    </span>
-                    <span class="flex items-center">
-                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {{ appointment.time }} - {{ appointment.endTime }}
-                    </span>
-                    <span class="flex items-center">
-                      <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {{ appointment.location }}
-                    </span>
+                        <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {{ formatDate(appointment.date) }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ appointment.time }} - {{ appointment.endTime }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ appointment.location }}
+                          </span>
+                        </div>
+
+                        @if (appointment.notes) {
+                          <p class="mt-3 text-sm text-gray-600 italic">{{ appointment.notes }}</p>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Right side: Status and Actions -->
+                    <div class="flex flex-col items-end space-y-3">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
+                        {{ appointment.status }}
+                      </span>
+
+                      <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+
+                      <div class="flex space-x-2">
+                        <button
+                          type="button"
+                          (click)="openReschedulePanel(appointment)"
+                          class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                        >
+                          Reschedule
+                        </button>
+                        <span class="text-gray-300">|</span>
+                        <button
+                          type="button"
+                          (click)="cancelAppointment(appointment.id)"
+                          class="text-sm text-red-600 hover:text-red-500 font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   </div>
-
-                  @if (appointment.notes) {
-                    <p class="mt-3 text-sm text-gray-600 italic">{{ appointment.notes }}</p>
-                  }
                 </div>
               </div>
+            }
+          </div>
+        </div>
+      }
 
-              <!-- Right side: Status and Actions -->
-              <div class="flex flex-col items-end space-y-3">
-                <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
-                  {{ appointment.status }}
-                </span>
+      <!-- Completed Appointments -->
+      @if (groupedAppointments().completed.length > 0) {
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 mr-3">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            Completed Appointments ({{ groupedAppointments().completed.length }})
+          </h2>
+          <div class="space-y-4" [@listAnimation]="groupedAppointments().completed.length">
+            @for (appointment of groupedAppointments().completed; track appointment.id) {
+              <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow opacity-75">
+                <div class="p-6">
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-start space-x-4">
+                      <!-- Professional Avatar -->
+                      <img
+                        [src]="appointment.professionalAvatar"
+                        [alt]="appointment.professional"
+                        class="w-12 h-12 rounded-full"
+                      />
 
-                <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+                      <!-- Appointment Details -->
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
 
-                @if (appointment.status === 'upcoming') {
-                  <div class="flex space-x-2">
-                    <button
-                      type="button"
-                      (click)="openReschedulePanel(appointment)"
-                      class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
-                    >
-                      Reschedule
-                    </button>
-                    <span class="text-gray-300">|</span>
-                    <button
-                      type="button"
-                      (click)="cancelAppointment(appointment.id)"
-                      class="text-sm text-red-600 hover:text-red-500 font-medium"
-                    >
-                      Cancel
-                    </button>
+                        <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {{ formatDate(appointment.date) }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ appointment.time }} - {{ appointment.endTime }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ appointment.location }}
+                          </span>
+                        </div>
+
+                        @if (appointment.notes) {
+                          <p class="mt-3 text-sm text-gray-600 italic">{{ appointment.notes }}</p>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Right side: Status and Price -->
+                    <div class="flex flex-col items-end space-y-3">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
+                        {{ appointment.status }}
+                      </span>
+
+                      <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+                    </div>
                   </div>
-                }
+                </div>
               </div>
-            </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Cancelled Appointments -->
+      @if (groupedAppointments().cancelled.length > 0) {
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600 mr-3">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            Cancelled Appointments ({{ groupedAppointments().cancelled.length }})
+          </h2>
+          <div class="space-y-4" [@listAnimation]="groupedAppointments().cancelled.length">
+            @for (appointment of groupedAppointments().cancelled; track appointment.id) {
+              <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow opacity-60">
+                <div class="p-6">
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-start space-x-4">
+                      <!-- Professional Avatar -->
+                      <img
+                        [src]="appointment.professionalAvatar"
+                        [alt]="appointment.professional"
+                        class="w-12 h-12 rounded-full"
+                      />
+
+                      <!-- Appointment Details -->
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
+
+                        <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {{ formatDate(appointment.date) }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ appointment.time }} - {{ appointment.endTime }}
+                          </span>
+                          <span class="flex items-center">
+                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ appointment.location }}
+                          </span>
+                        </div>
+
+                        @if (appointment.notes) {
+                          <p class="mt-3 text-sm text-gray-600 italic">{{ appointment.notes }}</p>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Right side: Status and Price -->
+                    <div class="flex flex-col items-end space-y-3">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
+                        {{ appointment.status }}
+                      </span>
+
+                      <div class="text-lg font-semibold text-gray-900 line-through">${{ appointment.price }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       }
