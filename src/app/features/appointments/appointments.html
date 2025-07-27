@@ -61,8 +61,8 @@
         <!-- Status Filter -->
         <div>
           <label for="status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-          <el-select id="status" name="status" [value]="filters().status" (change)="updateFilter({ status: $any($event.target).value })" class="mt-2 block">
-            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
+          <el-select id="status" name="status" (change)="updateFilter({ status: $any($event.target).value })" class="mt-2 block">
+            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pl-3 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
               <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-6">
                 <span class="block truncate">{{ getStatusLabel(filters().status) }}</span>
               </el-selectedcontent>
@@ -72,7 +72,7 @@
             </button>
 
             <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white p-0 py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
-              <el-option value="all" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="all" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">All Status</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -80,7 +80,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="upcoming" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="upcoming" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Upcoming</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -88,7 +88,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="completed" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="completed" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Completed</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -96,7 +96,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="cancelled" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="cancelled" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Cancelled</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -111,8 +111,8 @@
         <!-- Date Range Filter -->
         <div>
           <label for="dateRange" class="block text-sm/6 font-medium text-gray-900">Date Range</label>
-          <el-select id="dateRange" name="dateRange" [value]="filters().dateRange" (change)="updateFilter({ dateRange: $any($event.target).value })" class="mt-2 block">
-            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
+          <el-select id="dateRange" name="dateRange" (change)="updateFilter({ dateRange: $any($event.target).value })" class="mt-2 block">
+            <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pl-3 pr-2 text-left text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm/6">
               <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-6">
                 <span class="block truncate">{{ getDateRangeLabel(filters().dateRange) }}</span>
               </el-selectedcontent>
@@ -122,7 +122,7 @@
             </button>
 
             <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white p-0 py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
-              <el-option value="all" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="all" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">All Time</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -130,7 +130,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="this-week" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="this-week" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">This Week</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -138,7 +138,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="this-month" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="this-month" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">This Month</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
@@ -146,7 +146,7 @@
                   </svg>
                 </span>
               </el-option>
-              <el-option value="last-month" class="group/option relative cursor-default select-none py-2 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
+              <el-option value="last-month" class="group/option relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 focus:bg-indigo-600 focus:text-white focus:outline-none [&:not([hidden])]:block">
                 <span class="ml-3 block truncate font-normal group-aria-selected/option:font-semibold">Last Month</span>
                 <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 group-focus/option:text-white group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
                   <svg viewBox="0 0 20 20" data-slot="icon" aria-hidden="true" class="size-5 fill-current">
