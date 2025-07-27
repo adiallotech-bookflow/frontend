@@ -35,6 +35,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class Dashboard implements OnInit, OnDestroy {
   private appointmentsService = inject(AppointmentsMockService);
   private authService = inject(AuthService);
+  private timeSubscription?: Subscription;
 
   appointments = signal<DashboardAppointment[]>([]);
   quickStats = signal<DashboardStats>({
@@ -49,8 +50,15 @@ export class Dashboard implements OnInit, OnDestroy {
   showRescheduleDialog = signal(false);
   selectedAppointment = signal<DashboardAppointment | null>(null);
   currentTime = signal(new Date());
+  
+  // Loading state
+  isLoading = signal(true);
+  loadingTasks = {
+    appointments: false,
+    stats: false,
+    activities: false
+  };
 
-  private timeSubscription?: Subscription;
 
   upcomingAppointments = computed(() => {
     return this.appointments()
@@ -118,10 +126,6 @@ export class Dashboard implements OnInit, OnDestroy {
   confirmCancel() {
     const appointment = this.selectedAppointment();
     if (appointment) {
-      // In real app, call service to cancel appointment
-      console.log('Cancelling appointment:', appointment.id);
-
-      // Update appointment status
       this.appointments.update(apts =>
         apts.map(apt =>
           apt.id === appointment.id ? { ...apt, status: 'cancelled' as const } : apt
@@ -164,42 +168,51 @@ export class Dashboard implements OnInit, OnDestroy {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
 
-    // Load appointments based on user role
+    // Set loading state
+    this.isLoading.set(true);
+    this.loadingTasks = {
+      appointments: true,
+      stats: true,
+      activities: true
+    };
+
+    // Load appointments first
+    let appointmentsObservable;
     if (currentUser.role === 'customer') {
-      // Load customer's appointments
-      this.appointmentsService.getAppointmentsByCustomer(currentUser.id).subscribe(appointments => {
-        this.mapAppointmentsToDashboard(appointments);
-      });
+      appointmentsObservable = this.appointmentsService.getAppointmentsByCustomer(currentUser.id);
     } else if (currentUser.role === 'professional') {
-      // Load professional's appointments
-      this.appointmentsService.getAppointmentsByProfessional(currentUser.id).subscribe(appointments => {
-        this.mapAppointmentsToDashboard(appointments);
-      });
+      appointmentsObservable = this.appointmentsService.getAppointmentsByProfessional(currentUser.id);
     } else {
-      // Admin: load all upcoming appointments
-      this.appointmentsService.getUpcomingAppointments(10).subscribe(appointments => {
-        this.mapAppointmentsToDashboard(appointments);
-      });
+      appointmentsObservable = this.appointmentsService.getUpcomingAppointments(10, currentUser.id, currentUser.role);
     }
 
-    // Load dashboard stats
-    this.appointmentsService.getDashboardStats().subscribe(stats => {
-      const now = new Date();
-      const thisMonthCount = this.appointments().filter(apt => {
-        const aptDate = new Date(apt.date);
-        return aptDate.getMonth() === now.getMonth() && aptDate.getFullYear() === now.getFullYear();
-      }).length;
+    // Load appointments and then stats
+    appointmentsObservable.subscribe(appointments => {
+      this.mapAppointmentsToDashboard(appointments);
+      this.loadingTasks.appointments = false;
 
-      this.quickStats.set({
-        totalBookings: stats.totalAppointments,
-        thisMonth: thisMonthCount,
-        nextAppointment: this.appointments().length > 0 ? this.appointments()[0].date : null,
-        totalSpent: stats.totalRevenue
+      // Load stats after appointments are loaded
+      this.appointmentsService.getDashboardStats(currentUser.id, currentUser.role).subscribe(stats => {
+        const now = new Date();
+        const thisMonthCount = this.appointments().filter(apt => {
+          const aptDate = new Date(apt.date);
+          return aptDate.getMonth() === now.getMonth() && aptDate.getFullYear() === now.getFullYear();
+        }).length;
+
+        this.quickStats.set({
+          totalBookings: stats.totalAppointments,
+          thisMonth: thisMonthCount,
+          nextAppointment: this.appointments().length > 0 ? this.appointments()[0].date : null,
+          totalSpent: stats.totalRevenue
+        });
+        
+        this.loadingTasks.stats = false;
+        this.checkLoadingComplete();
       });
     });
 
     // Generate recent activity from appointments
-    this.appointmentsService.getRecentAppointments(5).subscribe(appointments => {
+    this.appointmentsService.getRecentAppointments(5, currentUser.id, currentUser.role).subscribe(appointments => {
       const activities: DashboardActivity[] = appointments.map((apt) => {
         let type: 'booking' | 'reschedule' | 'cancellation' = 'booking';
         let description = `Booked ${apt.service} with ${apt.professionalName}`;
@@ -218,12 +231,20 @@ export class Dashboard implements OnInit, OnDestroy {
       });
 
       this.recentActivity.set(activities);
+      this.loadingTasks.activities = false;
+      this.checkLoadingComplete();
     });
+  }
+
+  private checkLoadingComplete(): void {
+    if (!this.loadingTasks.appointments && !this.loadingTasks.stats && !this.loadingTasks.activities) {
+      this.isLoading.set(false);
+    }
   }
 
   private mapAppointmentsToDashboard(appointments: AppointmentExtended[]) {
     const dashboardAppointments: DashboardAppointment[] = appointments
-      .filter(apt => apt.status !== 'cancelled' && new Date(apt.date) > new Date())
+      .filter(apt => apt.status !== 'cancelled')
       .map(apt => ({
         id: apt.id,
         date: new Date(apt.date),

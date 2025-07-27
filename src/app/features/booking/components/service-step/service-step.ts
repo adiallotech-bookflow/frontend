@@ -1,6 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Service } from '../../../../core/models';
+import { AppointmentsMockService } from '../../../../core/services/mock';
 
 @Component({
   selector: 'app-service-step',
@@ -8,80 +9,41 @@ import { Service } from '../../../../core/models';
   templateUrl: './service-step.html',
   styleUrl: './service-step.css'
 })
-export class ServiceStep {
+export class ServiceStep implements OnInit {
+  private appointmentsService = inject(AppointmentsMockService);
+  
   selectedService = input<Service | null>(null);
   serviceSelected = output<Service>();
 
-  services: Service[] = [
-    {
-      id: '1',
-      name: 'Haircut',
-      description: 'Professional haircut tailored to your style',
-      duration: 30,
-      price: 35,
-      categoryId: 'hair'
-    },
-    {
-      id: '2',
-      name: 'Hair Color',
-      description: 'Full hair coloring service with premium products',
-      duration: 120,
-      price: 85,
-      categoryId: 'hair'
-    },
-    {
-      id: '3',
-      name: 'Facial Treatment',
-      description: 'Rejuvenating facial with deep cleansing',
-      duration: 60,
-      price: 65,
-      categoryId: 'skin'
-    },
-    {
-      id: '4',
-      name: 'Massage Therapy',
-      description: 'Relaxing full body massage',
-      duration: 60,
-      price: 80,
-      categoryId: 'wellness'
-    },
-    {
-      id: '5',
-      name: 'Manicure',
-      description: 'Professional nail care and polish',
-      duration: 45,
-      price: 40,
-      categoryId: 'nails'
-    },
-    {
-      id: '6',
-      name: 'Pedicure',
-      description: 'Complete foot and nail care treatment',
-      duration: 50,
-      price: 45,
-      categoryId: 'nails'
-    }
-  ];
+  services = signal<Service[]>([]);
+  categories = signal<{ id: string; name: string; icon: string }[]>([]);
+  selectedCategory = signal('all');
 
-  categories = [
-    { id: 'all', name: 'All Services', icon: 'grid' },
-    { id: 'hair', name: 'Hair', icon: 'scissors' },
-    { id: 'skin', name: 'Skin Care', icon: 'sparkles' },
-    { id: 'wellness', name: 'Wellness', icon: 'heart' },
-    { id: 'nails', name: 'Nails', icon: 'hand' }
-  ];
+  ngOnInit() {
+    // Load services from mock service
+    this.appointmentsService.getAvailableServices().subscribe(services => {
+      this.services.set(services);
+    });
 
-  selectedCategory = 'all';
+    // Load categories from mock service
+    this.appointmentsService.getServiceCategories().subscribe(categories => {
+      this.categories.set(categories);
+    });
+  }
 
   get filteredServices(): Service[] {
-    if (this.selectedCategory === 'all') {
-      return this.services;
+    if (this.selectedCategory() === 'all') {
+      return this.services();
     }
-    return this.services.filter(s => s.categoryId === this.selectedCategory);
+    return this.services().filter(s => s.categoryId === this.selectedCategory());
   }
 
   selectService(service: Service): void {
     this.serviceSelected.emit(service);
+  }
+
+  selectCategory(categoryId: string): void {
+    this.selectedCategory.set(categoryId);
   }
 
   isSelected(service: Service): boolean {

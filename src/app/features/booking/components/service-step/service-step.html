@@ -4,16 +4,16 @@
   <!-- Category Filter -->
   <div class="mb-6">
     <div class="flex flex-wrap gap-2">
-      @for (category of categories; track category.id) {
+      @for (category of categories(); track category.id) {
         <button
           type="button"
-          (click)="selectedCategory = category.id"
+          (click)="selectCategory(category.id)"
           class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-          [class.bg-indigo-600]="selectedCategory === category.id"
-          [class.text-white]="selectedCategory === category.id"
-          [class.bg-gray-100]="selectedCategory !== category.id"
-          [class.text-gray-700]="selectedCategory !== category.id"
-          [class.hover:bg-gray-200]="selectedCategory !== category.id"
+          [class.bg-indigo-600]="selectedCategory() === category.id"
+          [class.text-white]="selectedCategory() === category.id"
+          [class.bg-gray-100]="selectedCategory() !== category.id"
+          [class.text-gray-700]="selectedCategory() !== category.id"
+          [class.hover:bg-gray-200]="selectedCategory() !== category.id"
         >
           {{ category.name }}
         </button>

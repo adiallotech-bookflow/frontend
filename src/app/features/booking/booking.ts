@@ -1,12 +1,16 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ServiceStep } from './components/service-step/service-step';
 import { ProfessionalStep } from './components/professional-step/professional-step';
 import { DatetimeStep } from './components/datetime-step/datetime-step';
 import { DetailsStep } from './components/details-step/details-step';
 import { BookingSummary } from './components/booking-summary/booking-summary';
 import { BookingFormData, BookingStep, StepName } from '../../core/models';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { AppointmentsMockService } from '../../core/services/mock';
 
 @Component({
   selector: 'app-booking',
@@ -22,8 +26,12 @@ import { BookingFormData, BookingStep, StepName } from '../../core/models';
   templateUrl: './booking.html',
   styleUrl: './booking.css'
 })
-export class Booking {
-  private fb = new FormBuilder();
+export class Booking implements OnInit {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
+  private appointmentsService = inject(AppointmentsMockService);
+  private router = inject(Router);
 
   bookingForm: FormGroup;
   currentStep = signal<StepName>('service');
@@ -41,13 +49,7 @@ export class Booking {
     professional: null,
     date: null,
     time: null,
-    details: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '+1 (555) 123-4567',
-      notes: ''
-    }
+    details: null
   });
 
   currentStepIndex = computed(() => {
@@ -80,6 +82,7 @@ export class Booking {
   });
 
   constructor() {
+    // Initialize form with empty values first
     this.bookingForm = this.fb.group({
       service: [null, Validators.required],
       professional: [null, Validators.required],
@@ -88,13 +91,39 @@ export class Booking {
         time: [null, Validators.required]
       }),
       details: this.fb.group({
-        firstName: ['John', [Validators.required, Validators.minLength(2)]],
-        lastName: ['Doe', [Validators.required, Validators.minLength(2)]],
-        email: ['john.doe@example.com', [Validators.required, Validators.email]],
-        phone: ['+1 (555) 123-4567', [Validators.required, Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        lastName: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        phone: ['', [Validators.required, Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
         notes: ['']
       })
     });
+  }
+
+  ngOnInit(): void {
+    // Pre-fill form with current user data if available
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      const detailsForm = this.bookingForm.get('details');
+      detailsForm?.patchValue({
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        phone: '' // User might not have phone in the model, leave empty for user to fill
+      });
+
+      // Also update the signal for immediate display
+      this.formData.update(data => ({
+        ...data,
+        details: {
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+          email: currentUser.email,
+          phone: '',
+          notes: ''
+        }
+      }));
+    }
   }
 
   goToStep(stepName: StepName): void {
@@ -170,8 +199,57 @@ export class Booking {
 
   confirmBooking(): void {
     if (this.bookingForm.valid) {
-      console.log('Booking confirmed:', this.formData());
-      // Here you would typically send the booking to a service
+      const formData = this.formData();
+      const currentUser = this.authService.getCurrentUser();
+
+      if (!currentUser) {
+        this.notificationService.show({
+          type: 'error',
+          title: 'Authentication Required',
+          message: 'Please log in to complete your booking.'
+        });
+        this.router.navigate(['/auth/login']);
+        return;
+      }
+
+      // Create appointment data
+      const appointmentData = {
+        customerId: currentUser.id,
+        professionalId: formData.professional!.id,
+        service: formData.service!.name,
+        date: formData.date!.toISOString().split('T')[0],
+        time: formData.time!,
+        duration: formData.service!.duration,
+        price: formData.service!.price,
+        notes: formData.details?.notes
+      };
+      console.log('Appointment data:', appointmentData);
+      // Create the appointment
+      this.appointmentsService.createAppointment(appointmentData).subscribe({
+        next: (appointment) => {
+          console.log('Appointment created:', appointment);
+          this.notificationService.show({
+            type: 'success',
+            title: 'Booking Confirmed!',
+            message: `Your ${formData.service!.name} appointment with ${formData.professional!.name} has been confirmed for ${formData.date!.toLocaleDateString()} at ${formData.time}.`,
+            duration: 7000
+          });
+
+          // Navigate to dashboard after a short delay
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 2000);
+        },
+        error: (error) => {
+          this.notificationService.show({
+            type: 'error',
+            title: 'Booking Failed',
+            message: 'There was an error creating your appointment. Please try again.',
+            duration: 5000
+          });
+          console.error('Booking error:', error);
+        }
+      });
     }
   }
 }

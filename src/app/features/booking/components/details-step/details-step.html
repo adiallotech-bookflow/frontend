@@ -6,17 +6,18 @@
     <!-- Name Fields -->
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <div>
-        <label for="firstName" class="block text-sm font-medium text-gray-700">
+        <label for="firstName" class="block text-sm/6 font-medium text-gray-900">
           First name
         </label>
-        <div class="mt-1">
+        <div class="mt-2">
           <input
             type="text"
             id="firstName"
             formControlName="firstName"
             autocomplete="given-name"
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            [class.border-red-500]="firstName?.invalid && firstName?.touched"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            [class.outline-red-500]="firstName?.invalid && firstName?.touched"
+            [class.focus:outline-red-600]="firstName?.invalid && firstName?.touched"
           >
           @if (getErrorMessage('firstName')) {
             <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('firstName') }}</p>
@@ -25,17 +26,18 @@
       </div>
 
       <div>
-        <label for="lastName" class="block text-sm font-medium text-gray-700">
+        <label for="lastName" class="block text-sm/6 font-medium text-gray-900">
           Last name
         </label>
-        <div class="mt-1">
+        <div class="mt-2">
           <input
             type="text"
             id="lastName"
             formControlName="lastName"
             autocomplete="family-name"
-            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            [class.border-red-500]="lastName?.invalid && lastName?.touched"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            [class.outline-red-500]="lastName?.invalid && lastName?.touched"
+            [class.focus:outline-red-600]="lastName?.invalid && lastName?.touched"
           >
           @if (getErrorMessage('lastName')) {
             <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('lastName') }}</p>
@@ -46,17 +48,19 @@
 
     <!-- Email -->
     <div>
-      <label for="email" class="block text-sm font-medium text-gray-700">
+      <label for="email" class="block text-sm/6 font-medium text-gray-900">
         Email address
       </label>
-      <div class="mt-1">
+      <div class="mt-2">
         <input
           type="email"
           id="email"
           formControlName="email"
           autocomplete="email"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          [class.border-red-500]="email?.invalid && email?.touched"
+          placeholder="you@example.com"
+          class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          [class.outline-red-500]="email?.invalid && email?.touched"
+          [class.focus:outline-red-600]="email?.invalid && email?.touched"
         >
         @if (getErrorMessage('email')) {
           <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('email') }}</p>
@@ -66,18 +70,19 @@
 
     <!-- Phone -->
     <div>
-      <label for="phone" class="block text-sm font-medium text-gray-700">
+      <label for="phone" class="block text-sm/6 font-medium text-gray-900">
         Phone number
       </label>
-      <div class="mt-1">
+      <div class="mt-2">
         <input
           type="tel"
           id="phone"
           formControlName="phone"
           autocomplete="tel"
           placeholder="+1 (555) 123-4567"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          [class.border-red-500]="phone?.invalid && phone?.touched"
+          class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          [class.outline-red-500]="phone?.invalid && phone?.touched"
+          [class.focus:outline-red-600]="phone?.invalid && phone?.touched"
         >
         @if (getErrorMessage('phone')) {
           <p class="mt-2 text-sm text-red-600">{{ getErrorMessage('phone') }}</p>
@@ -87,16 +92,16 @@
 
     <!-- Notes -->
     <div>
-      <label for="notes" class="block text-sm font-medium text-gray-700">
+      <label for="notes" class="block text-sm/6 font-medium text-gray-900">
         Additional notes (optional)
       </label>
-      <div class="mt-1">
+      <div class="mt-2">
         <textarea
           id="notes"
           formControlName="notes"
           rows="3"
           placeholder="Any special requests or information we should know?"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
         ></textarea>
       </div>
     </div>

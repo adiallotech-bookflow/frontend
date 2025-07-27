@@ -1,7 +1,10 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppointmentDetails, AppointmentFilter, AppointmentStats } from '../../core/models';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
+import { AppointmentsMockService } from '../../core/services/mock';
+import { AuthService } from '../../core/services/auth.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-appointments',
@@ -21,10 +24,21 @@ import { animate, query, stagger, style, transition, trigger } from '@angular/an
     ])
   ]
 })
-export class Appointments {
+export class Appointments implements OnInit {
+  private appointmentsService = inject(AppointmentsMockService);
+  private authService = inject(AuthService);
   appointments = signal<AppointmentDetails[]>([]);
   filter = signal<AppointmentFilter>({ status: 'all', dateRange: 'all' });
   searchTerm = signal('');
+  stats = signal<AppointmentStats>({
+    total: 0,
+    upcoming: 0,
+    completed: 0,
+    cancelled: 0
+  });
+  
+  // Loading state
+  isLoading = signal(true);
 
   filteredAppointments = computed(() => {
     const allAppointments = this.appointments();
@@ -72,87 +86,107 @@ export class Appointments {
     });
   });
 
-  stats = computed<AppointmentStats>(() => {
-    const all = this.appointments();
-    return {
-      total: all.length,
-      upcoming: all.filter(a => a.status === 'upcoming').length,
-      completed: all.filter(a => a.status === 'completed').length,
-      cancelled: all.filter(a => a.status === 'cancelled').length
-    };
-  });
 
-  constructor() {
+  ngOnInit(): void {
+    this.isLoading.set(true);
     this.loadAppointments();
+    this.loadStats();
+  }
+
+  private loadStats(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    this.appointmentsService.getDashboardStats(currentUser.id, currentUser.role).subscribe(stats => {
+      this.stats.set({
+        total: stats.totalAppointments,
+        upcoming: stats.upcomingAppointments,
+        completed: stats.completedAppointments,
+        cancelled: stats.cancelledAppointments
+      });
+    });
   }
 
   private loadAppointments(): void {
-    const now = new Date();
-    const mockAppointments: AppointmentDetails[] = [
-      {
-        id: '1',
-        date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-        time: '10:00',
-        endTime: '11:00',
-        service: 'Haircut & Style',
-        serviceCategory: 'Hair Services',
-        professional: 'Sarah Johnson',
-        professionalAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-        location: 'Downtown Salon',
-        status: 'upcoming',
-        price: 75,
-        duration: 60,
-        notes: 'Regular trim and styling',
-        createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '2',
-        date: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000),
-        time: '14:00',
-        endTime: '15:30',
-        service: 'Deep Tissue Massage',
-        serviceCategory: 'Wellness',
-        professional: 'Michael Chen',
-        professionalAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
-        location: 'Wellness Center',
-        status: 'completed',
-        price: 120,
-        duration: 90,
-        createdAt: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '3',
-        date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
-        time: '09:00',
-        endTime: '10:00',
-        service: 'Dental Checkup',
-        serviceCategory: 'Healthcare',
-        professional: 'Dr. Emily Davis',
-        professionalAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily',
-        location: 'City Dental Clinic',
-        status: 'upcoming',
-        price: 150,
-        duration: 60,
-        createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '4',
-        date: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-        time: '16:00',
-        endTime: '17:00',
-        service: 'Personal Training',
-        serviceCategory: 'Fitness',
-        professional: 'James Wilson',
-        professionalAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=James',
-        location: 'FitZone Gym',
-        status: 'cancelled',
-        price: 80,
-        duration: 60,
-        createdAt: new Date(now.getTime() - 35 * 24 * 60 * 60 * 1000)
-      }
-    ];
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
 
-    this.appointments.set(mockAppointments);
+    // Load appointments based on user role
+    let appointmentsObservable;
+    if (currentUser.role === 'customer') {
+      appointmentsObservable = this.appointmentsService.getAppointmentsByCustomer(currentUser.id);
+    } else if (currentUser.role === 'professional') {
+      appointmentsObservable = this.appointmentsService.getAppointmentsByProfessional(currentUser.id);
+    } else {
+      // Admin sees all appointments
+      appointmentsObservable = this.appointmentsService.getAppointments();
+    }
+
+    appointmentsObservable.pipe(
+      map(appointments => 
+        appointments.map(apt => {
+          const startTime = new Date(apt.date + 'T' + apt.time);
+          const endTime = new Date(startTime.getTime() + apt.duration * 60000);
+          
+          // Map status to AppointmentDetails status type
+          let status: AppointmentDetails['status'];
+          switch (apt.status) {
+            case 'scheduled':
+            case 'confirmed':
+              status = 'upcoming';
+              break;
+            case 'completed':
+              status = 'completed';
+              break;
+            case 'cancelled':
+              status = 'cancelled';
+              break;
+            default:
+              status = 'upcoming';
+          }
+          
+          // Map to AppointmentDetails interface
+          const appointmentDetails: AppointmentDetails = {
+            id: apt.id,
+            date: new Date(apt.date),
+            time: apt.time,
+            endTime: `${endTime.getHours().toString().padStart(2, '0')}:${endTime.getMinutes().toString().padStart(2, '0')}`,
+            service: apt.service,
+            serviceCategory: this.getServiceCategory(apt.service),
+            professional: apt.professionalName,
+            professionalAvatar: `https://ui-avatars.com/api/?name=${apt.professionalName.replace(' ', '+')}&background=6366f1&color=fff`,
+            location: 'Downtown Salon', // Default location
+            status,
+            price: apt.price,
+            duration: apt.duration,
+            notes: apt.notes,
+            createdAt: new Date() // We don't have created date in the mock
+          };
+          
+          return appointmentDetails;
+        })
+      )
+    ).subscribe(appointments => {
+      this.appointments.set(appointments);
+      this.isLoading.set(false);
+    });
+  }
+
+  private getServiceCategory(service: string): string {
+    // Map services to categories
+    const categories: { [key: string]: string } = {
+      'Men\'s Haircut': 'Hair Services',
+      'Women\'s Haircut': 'Hair Services',
+      'Hair Coloring': 'Hair Services',
+      'Highlights': 'Hair Services',
+      'Blowout': 'Hair Services',
+      'Beard Trim': 'Hair Services',
+      'Hair Treatment': 'Hair Services',
+      'Wedding Hair': 'Hair Services',
+      'Perm': 'Hair Services',
+      'Hair Straightening': 'Hair Services'
+    };
+    return categories[service] || 'General Services';
   }
 
   updateFilter(newFilter: Partial<AppointmentFilter>): void {
@@ -160,11 +194,21 @@ export class Appointments {
   }
 
   cancelAppointment(id: string): void {
-    this.appointments.update(appointments =>
-      appointments.map(apt =>
-        apt.id === id ? { ...apt, status: 'cancelled' as const } : apt
-      )
-    );
+    this.appointmentsService.cancelAppointment(id).subscribe({
+      next: () => {
+        // Update local state
+        this.appointments.update(appointments =>
+          appointments.map(apt =>
+            apt.id === id ? { ...apt, status: 'cancelled' as const } : apt
+          )
+        );
+        // Reload stats to reflect the change
+        this.loadStats();
+      },
+      error: (error) => {
+        console.error('Error cancelling appointment:', error);
+      }
+    });
   }
 
   getStatusColor(status: string): string {

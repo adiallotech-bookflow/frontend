@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { MockBaseService } from './mock-base.service';
 import { MockDataGenerator } from './mock-data.generator';
-import { Customer, AppointmentFormData, AppointmentExtended, ProfessionalExtended, TimeSlotAvailability } from '../../models';
+import { Customer, AppointmentFormData, AppointmentExtended, ProfessionalExtended, TimeSlotAvailability, Service } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -155,6 +155,7 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
       status: 'scheduled',
       notes: data.notes
     };
+    console.log('Creating appointment:', appointment);
 
     return this.addToMockData(appointment);
   }
@@ -236,11 +237,21 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     );
   }
 
-  getUpcomingAppointments(limit: number = 5): Observable<AppointmentExtended[]> {
+  getUpcomingAppointments(limit: number = 5, userId?: string, userRole?: 'admin' | 'professional' | 'customer'): Observable<AppointmentExtended[]> {
     return this.simulateDelay().pipe(
       map(() => {
         const now = new Date();
-        const appointments = this.getStoredData() || [];
+        let appointments = this.getStoredData() || [];
+
+        // Filter appointments based on user role
+        if (userId && userRole) {
+          if (userRole === 'customer') {
+            appointments = appointments.filter(apt => apt.customerId === userId);
+          } else if (userRole === 'professional') {
+            appointments = appointments.filter(apt => apt.professionalId === userId);
+          }
+          // Admin sees all appointments (no filter)
+        }
 
         return appointments
           .filter(apt => new Date(apt.date) > now && apt.status !== 'cancelled')
@@ -250,10 +261,20 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     );
   }
 
-  getRecentAppointments(limit: number = 5): Observable<AppointmentExtended[]> {
+  getRecentAppointments(limit: number = 5, userId?: string, userRole?: 'admin' | 'professional' | 'customer'): Observable<AppointmentExtended[]> {
     return this.simulateDelay().pipe(
       map(() => {
-        const appointments = this.getStoredData() || [];
+        let appointments = this.getStoredData() || [];
+
+        // Filter appointments based on user role
+        if (userId && userRole) {
+          if (userRole === 'customer') {
+            appointments = appointments.filter(apt => apt.customerId === userId);
+          } else if (userRole === 'professional') {
+            appointments = appointments.filter(apt => apt.professionalId === userId);
+          }
+          // Admin sees all appointments (no filter)
+        }
 
         return appointments
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -272,7 +293,7 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
     this.initializeMockData();
   }
 
-  getDashboardStats(): Observable<{
+  getDashboardStats(userId?: string, userRole?: 'admin' | 'professional' | 'customer'): Observable<{
     totalAppointments: number;
     upcomingAppointments: number;
     completedAppointments: number;
@@ -281,8 +302,18 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
   }> {
     return this.simulateDelay().pipe(
       map(() => {
-        const appointments = this.getStoredData() || [];
+        let appointments = this.getStoredData() || [];
         const now = new Date();
+
+        // Filter appointments based on user role
+        if (userId && userRole) {
+          if (userRole === 'customer') {
+            appointments = appointments.filter(apt => apt.customerId === userId);
+          } else if (userRole === 'professional') {
+            appointments = appointments.filter(apt => apt.professionalId === userId);
+          }
+          // Admin sees all appointments (no filter)
+        }
 
         return {
           totalAppointments: appointments.length,
@@ -297,5 +328,111 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
         };
       })
     );
+  }
+
+  getAvailableServices(): Observable<Service[]> {
+    return this.simulateDelay().pipe(
+      map(() => {
+        // Extract unique services from professionals
+        const servicesMap = new Map<string, Service>();
+        let serviceId = 1;
+
+        this.professionals.forEach(professional => {
+          professional.specialties.forEach(specialty => {
+            if (!servicesMap.has(specialty)) {
+              const basePrice = this.getServiceBasePrice(specialty);
+              const baseDuration = this.getServiceBaseDuration(specialty);
+
+              servicesMap.set(specialty, {
+                id: `service-${serviceId++}`,
+                name: specialty,
+                description: this.getServiceDescription(specialty),
+                duration: baseDuration,
+                price: basePrice,
+                categoryId: this.getServiceCategory(specialty)
+              });
+            }
+          });
+        });
+
+        return Array.from(servicesMap.values());
+      })
+    );
+  }
+
+  getServiceCategories(): Observable<{ id: string; name: string; icon: string }[]> {
+    return this.simulateDelay().pipe(
+      map(() => [
+        { id: 'all', name: 'All Services', icon: 'grid' },
+        { id: 'hair', name: 'Hair', icon: 'scissors' },
+        { id: 'beauty', name: 'Beauty', icon: 'sparkles' },
+        { id: 'treatment', name: 'Treatment', icon: 'heart' },
+        { id: 'style', name: 'Style', icon: 'brush' }
+      ])
+    );
+  }
+
+  private getServiceDescription(serviceName: string): string {
+    const descriptions: { [key: string]: string } = {
+      'Men\'s Haircut': 'Professional men\'s haircut tailored to your style',
+      'Women\'s Haircut': 'Expert women\'s haircut with styling consultation',
+      'Hair Coloring': 'Full hair coloring service with premium products',
+      'Highlights': 'Professional highlights for a natural, sun-kissed look',
+      'Blowout': 'Professional blowout for smooth, voluminous hair',
+      'Beard Trim': 'Expert beard shaping and grooming',
+      'Hair Treatment': 'Deep conditioning treatment for healthy hair',
+      'Wedding Hair': 'Special occasion hair styling for your big day',
+      'Perm': 'Professional permanent wave for lasting curls',
+      'Hair Straightening': 'Professional straightening treatment'
+    };
+    return descriptions[serviceName] || `Professional ${serviceName.toLowerCase()} service`;
+  }
+
+  private getServiceBasePrice(serviceName: string): number {
+    const prices: { [key: string]: number } = {
+      'Men\'s Haircut': 35,
+      'Women\'s Haircut': 45,
+      'Hair Coloring': 85,
+      'Highlights': 120,
+      'Blowout': 50,
+      'Beard Trim': 25,
+      'Hair Treatment': 65,
+      'Wedding Hair': 150,
+      'Perm': 95,
+      'Hair Straightening': 110
+    };
+    return prices[serviceName] || 50;
+  }
+
+  private getServiceBaseDuration(serviceName: string): number {
+    const durations: { [key: string]: number } = {
+      'Men\'s Haircut': 30,
+      'Women\'s Haircut': 45,
+      'Hair Coloring': 120,
+      'Highlights': 150,
+      'Blowout': 45,
+      'Beard Trim': 20,
+      'Hair Treatment': 60,
+      'Wedding Hair': 120,
+      'Perm': 180,
+      'Hair Straightening': 120
+    };
+    return durations[serviceName] || 60;
+  }
+
+  private getServiceCategory(serviceName: string): string {
+    const categories: { [key: string]: string } = {
+      'Men\'s Haircut': 'hair',
+      'Women\'s Haircut': 'hair',
+      'Hair Coloring': 'hair',
+      'Highlights': 'hair',
+      'Blowout': 'style',
+      'Beard Trim': 'hair',
+      'Hair Treatment': 'treatment',
+      'Wedding Hair': 'style',
+      'Perm': 'treatment',
+      'Hair Straightening': 'treatment'
+    };
+    return categories[serviceName] || 'beauty';
   }
 }

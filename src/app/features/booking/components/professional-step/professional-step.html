@@ -4,7 +4,7 @@
 
   <!-- Professionals List -->
   <div class="space-y-4">
-    @for (professional of professionals; track professional.id) {
+    @for (professional of professionals(); track professional.id) {
       <div
         (click)="selectProfessional(professional)"
         class="relative rounded-lg border-2 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg"
@@ -70,7 +70,7 @@
     }
   </div>
 
-  @if (professionals.length === 0) {
+  @if (professionals().length === 0) {
     <div class="text-center py-12">
       <svg class="mx-auto h-12 w-12 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />

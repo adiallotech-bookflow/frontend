@@ -71,7 +71,7 @@ export abstract class MockBaseService<T> {
       this.emitUpdate(data);
       return;
     }
-
+    console.log('saving to storage', data);
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(data));
       this.emitUpdate(data);

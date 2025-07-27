@@ -13,7 +13,7 @@ export class MockDataGenerator {
   ];
 
   private static services = [
-    'Men\'s Haircut', 'Women\'s Haircut', 'Hair Coloring', 'Highlights', 'Blowout',
+    'Men\'s Haircut', 'Women\'s Haircut', 'Hair Coloring', 'Highlights 1', 'Blowout',
     'Beard Trim', 'Hair Treatment', 'Wedding Hair', 'Perm', 'Hair Straightening'
   ];
 
@@ -99,12 +99,18 @@ export class MockDataGenerator {
     const customer = customers[Math.floor(Math.random() * customers.length)];
     const service = professional.specialties[Math.floor(Math.random() * professional.specialties.length)];
 
+    const now = new Date();
     const date = new Date();
     date.setDate(date.getDate() + Math.floor(Math.random() * 30) - 15);
     date.setHours(9 + Math.floor(Math.random() * 10), Math.random() > 0.5 ? 0 : 30, 0, 0);
 
-    const statuses: Appointment['status'][] = ['confirmed', 'scheduled', 'cancelled', 'completed'];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    // Determine status based on date
+    let status: Appointment['status'];
+    if (date < now) {
+      status = Math.random() > 0.3 ? 'completed' : 'cancelled';
+    } else {
+      status = Math.random() > 0.4 ? 'confirmed' : 'scheduled';
+    }
 
     return {
       id: this.generateId(),
@@ -133,13 +139,13 @@ export class MockDataGenerator {
     // Use existing users as professionals and customers
     const professionals = this.getUsersAsProfessionals();
     const customers = this.getUsersAsCustomers();
-    
+
     // If we need more professionals, generate additional ones
     const additionalProfessionalsNeeded = Math.max(0, 5 - professionals.length);
     for (let i = 0; i < additionalProfessionalsNeeded; i++) {
       professionals.push(this.generateProfessional());
     }
-    
+
     const appointments = Array(count).fill(null).map(() => this.generateAppointment(professionals, customers));
 
     return { appointments, professionals, customers };
