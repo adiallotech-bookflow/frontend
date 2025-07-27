@@ -13,9 +13,7 @@ export abstract class MockBaseService<T> {
   protected updateSubject = new Subject<T[]>();
   protected configService = inject(MockConfigService);
 
-  public updates$ = this.updateSubject.asObservable();
-
-  constructor() {
+  protected constructor() {
     this.initializeStorage();
   }
 

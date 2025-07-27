@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { MockBaseService } from './mock-base.service';
 import { MockDataGenerator } from './mock-data.generator';
@@ -24,9 +24,15 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
   private initializeMockData(): void {
     const storedAppointments = this.getStoredData();
 
-    if (!storedAppointments || storedAppointments.length === 0) {
-      const { appointments, professionals, customers } = MockDataGenerator.generateMultipleAppointments(20);
+    // Always regenerate data to ensure it matches current users
+    const { appointments, professionals, customers } = MockDataGenerator.generateMultipleAppointments(20);
 
+    // Check if we need to update stored data
+    const needsUpdate = !storedAppointments ||
+                       storedAppointments.length === 0 ||
+                       !this.dataMatchesCurrentUsers(storedAppointments, customers);
+
+    if (needsUpdate) {
       this.defaultData = appointments;
       this.professionals = professionals;
       this.customers = customers;
@@ -38,6 +44,16 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
       this.professionals = this.loadProfessionals();
       this.customers = this.loadCustomers();
     }
+  }
+
+  private dataMatchesCurrentUsers(appointments: AppointmentExtended[], customers: Customer[]): boolean {
+    // Check if the customer IDs in appointments match our current customer IDs
+    const customerIds = new Set(customers.map(c => c.id));
+    const appointmentCustomerIds = new Set(appointments.map(a => a.customerId));
+
+    // Check if we have appointments for our test users
+    return customerIds.has('customer-user-id') &&
+           appointmentCustomerIds.has('customer-user-id');
   }
 
   private saveProfessionals(professionals: ProfessionalExtended[]): void {
@@ -244,6 +260,16 @@ export class AppointmentsMockService extends MockBaseService<AppointmentExtended
           .slice(0, limit);
       })
     );
+  }
+
+  regenerateAllData(): void {
+    // Clear all stored data
+    localStorage.removeItem(this.storageKey);
+    localStorage.removeItem(this.professionalsStorageKey);
+    localStorage.removeItem(this.customersStorageKey);
+
+    // Regenerate fresh data
+    this.initializeMockData();
   }
 
   getDashboardStats(): Observable<{

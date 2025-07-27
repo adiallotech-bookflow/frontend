@@ -1,10 +1,12 @@
-import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { animate, style, transition, trigger, stagger, query } from '@angular/animations';
 import { interval, Subscription } from 'rxjs';
-import { formatDistanceToNow, isFuture, addDays, format } from 'date-fns';
-import { DashboardAppointment, DashboardStats, DashboardActivity } from '../../core/models';
+import { formatDistanceToNow, isFuture, format } from 'date-fns';
+import { DashboardAppointment, DashboardStats, DashboardActivity, AppointmentExtended } from '../../core/models';
+import { AppointmentsMockService } from '../../core/services/mock';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,6 +33,9 @@ import { DashboardAppointment, DashboardStats, DashboardActivity } from '../../c
   ]
 })
 export class Dashboard implements OnInit, OnDestroy {
+  private appointmentsService = inject(AppointmentsMockService);
+  private authService = inject(AuthService);
+
   appointments = signal<DashboardAppointment[]>([]);
   quickStats = signal<DashboardStats>({
     totalBookings: 0,
@@ -57,7 +62,6 @@ export class Dashboard implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadDashboardData();
 
-    // Update current time every minute for countdown
     this.timeSubscription = interval(60000).subscribe(() => {
       this.currentTime.set(new Date());
     });
@@ -65,81 +69,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.timeSubscription?.unsubscribe();
-  }
-
-  private loadDashboardData() {
-    // Sample data - in real app, this would come from a service
-    const now = new Date();
-
-    this.appointments.set([
-      {
-        id: '1',
-        date: addDays(now, 2),
-        time: '10:00',
-        service: 'Haircut',
-        professional: 'Dr. Sarah Johnson',
-        professionalAvatar: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=6366f1&color=fff',
-        status: 'upcoming',
-        price: 35,
-        duration: 30
-      },
-      {
-        id: '2',
-        date: addDays(now, 7),
-        time: '14:30',
-        service: 'Hair Color',
-        professional: 'Michael Chen',
-        professionalAvatar: 'https://ui-avatars.com/api/?name=Michael+Chen&background=6366f1&color=fff',
-        status: 'upcoming',
-        price: 85,
-        duration: 120
-      },
-      {
-        id: '3',
-        date: addDays(now, 14),
-        time: '11:00',
-        service: 'Facial Treatment',
-        professional: 'Emma Wilson',
-        professionalAvatar: 'https://ui-avatars.com/api/?name=Emma+Wilson&background=6366f1&color=fff',
-        status: 'upcoming',
-        price: 65,
-        duration: 60
-      }
-    ]);
-
-    this.quickStats.set({
-      totalBookings: 24,
-      thisMonth: 3,
-      nextAppointment: addDays(now, 2),
-      totalSpent: 1250
-    });
-
-    this.recentActivity.set([
-      {
-        id: '1',
-        type: 'booking',
-        description: 'Booked Haircut with Dr. Sarah Johnson',
-        date: addDays(now, -1)
-      },
-      {
-        id: '2',
-        type: 'reschedule',
-        description: 'Rescheduled Massage Therapy to next week',
-        date: addDays(now, -3)
-      },
-      {
-        id: '3',
-        type: 'booking',
-        description: 'Booked Hair Color with Michael Chen',
-        date: addDays(now, -5)
-      },
-      {
-        id: '4',
-        type: 'cancellation',
-        description: 'Cancelled Manicure appointment',
-        date: addDays(now, -7)
-      }
-    ]);
   }
 
   getCountdown(date: Date): string {
@@ -218,7 +147,6 @@ export class Dashboard implements OnInit, OnDestroy {
   confirmReschedule() {
     const appointment = this.selectedAppointment();
     if (appointment) {
-      // In real app, navigate to reschedule flow
       console.log('Rescheduling appointment:', appointment.id);
     }
 
@@ -230,5 +158,84 @@ export class Dashboard implements OnInit, OnDestroy {
     this.showCancelDialog.set(false);
     this.showRescheduleDialog.set(false);
     this.selectedAppointment.set(null);
+  }
+
+  private loadDashboardData() {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    // Load appointments based on user role
+    if (currentUser.role === 'customer') {
+      // Load customer's appointments
+      this.appointmentsService.getAppointmentsByCustomer(currentUser.id).subscribe(appointments => {
+        this.mapAppointmentsToDashboard(appointments);
+      });
+    } else if (currentUser.role === 'professional') {
+      // Load professional's appointments
+      this.appointmentsService.getAppointmentsByProfessional(currentUser.id).subscribe(appointments => {
+        this.mapAppointmentsToDashboard(appointments);
+      });
+    } else {
+      // Admin: load all upcoming appointments
+      this.appointmentsService.getUpcomingAppointments(10).subscribe(appointments => {
+        this.mapAppointmentsToDashboard(appointments);
+      });
+    }
+
+    // Load dashboard stats
+    this.appointmentsService.getDashboardStats().subscribe(stats => {
+      const now = new Date();
+      const thisMonthCount = this.appointments().filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate.getMonth() === now.getMonth() && aptDate.getFullYear() === now.getFullYear();
+      }).length;
+
+      this.quickStats.set({
+        totalBookings: stats.totalAppointments,
+        thisMonth: thisMonthCount,
+        nextAppointment: this.appointments().length > 0 ? this.appointments()[0].date : null,
+        totalSpent: stats.totalRevenue
+      });
+    });
+
+    // Generate recent activity from appointments
+    this.appointmentsService.getRecentAppointments(5).subscribe(appointments => {
+      const activities: DashboardActivity[] = appointments.map((apt) => {
+        let type: 'booking' | 'reschedule' | 'cancellation' = 'booking';
+        let description = `Booked ${apt.service} with ${apt.professionalName}`;
+
+        if (apt.status === 'cancelled') {
+          type = 'cancellation';
+          description = `Cancelled ${apt.service} appointment`;
+        }
+
+        return {
+          id: apt.id,
+          type,
+          description,
+          date: new Date(apt.date)
+        };
+      });
+
+      this.recentActivity.set(activities);
+    });
+  }
+
+  private mapAppointmentsToDashboard(appointments: AppointmentExtended[]) {
+    const dashboardAppointments: DashboardAppointment[] = appointments
+      .filter(apt => apt.status !== 'cancelled' && new Date(apt.date) > new Date())
+      .map(apt => ({
+        id: apt.id,
+        date: new Date(apt.date),
+        time: apt.time,
+        service: apt.service,
+        professional: apt.professionalName,
+        professionalAvatar: `https://ui-avatars.com/api/?name=${apt.professionalName.replace(' ', '+')}&background=6366f1&color=fff`,
+        status: 'upcoming' as const,
+        price: apt.price,
+        duration: apt.duration
+      }));
+
+    this.appointments.set(dashboardAppointments);
   }
 }

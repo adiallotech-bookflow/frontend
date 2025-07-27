@@ -1,4 +1,5 @@
 import { Appointment, Customer, AppointmentExtended, ProfessionalExtended, TimeSlotAvailability } from '../../models';
+import { MOCK_USERS } from './mock-users.data';
 
 export class MockDataGenerator {
   private static firstNames = [
@@ -22,7 +23,7 @@ export class MockDataGenerator {
   ];
 
   static generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   static generatePhoneNumber(): string {
@@ -32,11 +33,6 @@ export class MockDataGenerator {
     return `(${areaCode}) ${prefix}-${lineNumber}`;
   }
 
-  static generateEmail(firstName: string, lastName: string): string {
-    const domains = ['gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com'];
-    const domain = domains[Math.floor(Math.random() * domains.length)];
-    return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}`;
-  }
 
   static generateTimeSlot(date: Date, hour: number, minute: number = 0): TimeSlotAvailability {
     const start = new Date(date);
@@ -68,16 +64,34 @@ export class MockDataGenerator {
     };
   }
 
-  static generateCustomer(): Customer {
-    const firstName = this.firstNames[Math.floor(Math.random() * this.firstNames.length)];
-    const lastName = this.lastNames[Math.floor(Math.random() * this.lastNames.length)];
+  static getUsersAsCustomers(): Customer[] {
+    // Convert users with customer role to Customer objects
+    return MOCK_USERS
+      .filter(user => user.role === 'customer')
+      .map(user => ({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        phone: this.generatePhoneNumber()
+      }));
+  }
 
-    return {
-      id: this.generateId(),
-      name: `${firstName} ${lastName}`,
-      email: this.generateEmail(firstName, lastName),
-      phone: this.generatePhoneNumber()
-    };
+  static getUsersAsProfessionals(): ProfessionalExtended[] {
+    // Convert users with professional role to ProfessionalExtended objects
+    return MOCK_USERS
+      .filter(user => user.role === 'professional')
+      .map(user => {
+        const specialties = this.services.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 3) + 2);
+        return {
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          specialty: specialties[0],
+          specialties,
+          avatar: user.avatar || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`,
+          rating: Number((3.5 + Math.random() * 1.5).toFixed(1)),
+          businessName: this.businessNames[Math.floor(Math.random() * this.businessNames.length)]
+        };
+      });
   }
 
   static generateAppointment(professionals: ProfessionalExtended[], customers: Customer[]): AppointmentExtended {
@@ -116,8 +130,16 @@ export class MockDataGenerator {
     professionals: ProfessionalExtended[],
     customers: Customer[]
   } {
-    const professionals = Array(5).fill(null).map(() => this.generateProfessional());
-    const customers = Array(15).fill(null).map(() => this.generateCustomer());
+    // Use existing users as professionals and customers
+    const professionals = this.getUsersAsProfessionals();
+    const customers = this.getUsersAsCustomers();
+    
+    // If we need more professionals, generate additional ones
+    const additionalProfessionalsNeeded = Math.max(0, 5 - professionals.length);
+    for (let i = 0; i < additionalProfessionalsNeeded; i++) {
+      professionals.push(this.generateProfessional());
+    }
+    
     const appointments = Array(count).fill(null).map(() => this.generateAppointment(professionals, customers));
 
     return { appointments, professionals, customers };
