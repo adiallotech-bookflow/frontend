@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { NotificationComponent } from '../../shared/components/notification/notification';
 
 interface NavItem {
   label: string;
@@ -10,7 +11,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-main-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NotificationComponent],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css'
 })

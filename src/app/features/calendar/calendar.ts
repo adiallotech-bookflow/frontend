@@ -1,9 +1,10 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarService } from '../../core/services/calendar';
-import { CalendarMonth, CalendarDay, DayAvailability } from '../../core/models';
+import { NotificationService } from '../../core/services/notification.service';
+import { CalendarMonth, CalendarDay, DayAvailability, UserAppointment } from '../../core/models';
 import { animate, style, transition, trigger } from '@angular/animations';
-import {TimeSlotsSlideOver} from './components/time-slots-slideover/time-slots-slideover';
+import { TimeSlotsSlideOver } from './components/time-slots-slideover/time-slots-slideover';
 
 @Component({
   selector: 'app-calendar',
@@ -25,11 +26,14 @@ import {TimeSlotsSlideOver} from './components/time-slots-slideover/time-slots-s
 })
 export class Calendar {
   private calendarService = inject(CalendarService);
+  private notificationService = inject(NotificationService);
 
   currentDate = signal(new Date());
   selectedDate = signal<Date | null>(null);
   showDayDetails = signal(false);
   selectedDayAvailability = signal<DayAvailability | null>(null);
+  selectedProfessionalId = signal<string>('prof1');
+  userAppointments = signal<UserAppointment[]>([]);
 
   calendarMonth = computed<CalendarMonth>(() => {
     return this.calendarService.generateCalendarGrid(this.currentDate());
@@ -52,6 +56,9 @@ export class Calendar {
     // Set up some sample booked slots
     const today = new Date();
     this.calendarService.setBookedSlots(today, ['10:00', '11:00', '14:00']);
+
+    // Set up sample user appointments
+    this.loadUserAppointments();
   }
 
   navigateToPreviousMonth(): void {
@@ -73,6 +80,11 @@ export class Calendar {
       return;
     }
 
+    // Don't allow selection of days with existing appointments or past dates
+    if (this.hasUserAppointment(day) || this.isPastDate(day)) {
+      return;
+    }
+
     this.selectedDate.set(day.date);
 
     if (day.isAvailable) {
@@ -91,9 +103,49 @@ export class Calendar {
 
   onTimeSlotSelected(event: any): void {
     console.log('Selected time slot:', event);
-    // Here you can implement the booking logic
-    // For now, we'll just close the slide-over
+
+    const selectedDateStr = this.selectedDate()?.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Close slideover first
     this.closeDayDetails();
+
+    // Show confirmation after a small delay to allow slideover to close
+    setTimeout(() => {
+      this.notificationService.showConfirmation(
+        'Confirm Booking',
+        `Book appointment for ${selectedDateStr} at ${event.time}?`,
+        () => {
+          if (this.selectedDate()) {
+            // Add to user appointments
+            const newAppointment: UserAppointment = {
+              id: `temp-${Date.now()}`,
+              date: this.selectedDate()!,
+              time: event.time,
+              service: 'Selected Service',
+              professional: 'Selected Professional',
+              professionalId: this.selectedProfessionalId(),
+              status: 'upcoming'
+            };
+
+            this.userAppointments.update(appointments => [...appointments, newAppointment]);
+
+            // Show success notification
+            this.notificationService.show({
+              type: 'success',
+              title: 'Booking Confirmed',
+              message: `Your appointment has been booked for ${event.time}`,
+              autoClose: true,
+              duration: 5000
+            });
+          }
+        }
+      );
+    }, 300);
   }
 
   isSelected(day: CalendarDay): boolean {
@@ -104,32 +156,65 @@ export class Calendar {
            day.date.getFullYear() === selected.getFullYear();
   }
 
-  getDayClasses(day: CalendarDay): string {
-    const classes: string[] = [];
-
-    if (!day.isCurrentMonth) {
-      classes.push('text-gray-400 bg-gray-50');
-    } else if (day.isToday) {
-      classes.push('font-bold ring-2 ring-indigo-600 ring-offset-2');
-    }
-
-    if (day.isAvailable && day.isCurrentMonth) {
-      classes.push('bg-green-50 text-green-900 hover:bg-green-100 cursor-pointer');
-    } else if (day.isCurrentMonth && !day.isWeekend) {
-      classes.push('bg-red-50 text-red-900');
-    }
-
-    if (this.isSelected(day)) {
-      classes.push('bg-indigo-600 text-white hover:bg-indigo-700');
-    }
-
-    return classes.join(' ');
-  }
-
   getAvailableSlotCount(day: CalendarDay): number {
     if (!day.isAvailable) return 0;
 
     const availability = this.calendarService.calculateAvailableTimeSlots(day.date);
     return availability.timeSlots.filter(slot => slot.isAvailable).length;
+  }
+
+  private loadUserAppointments(): void {
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    const nextMonth = new Date(today);
+    nextMonth.setDate(today.getDate() + 30);
+
+    this.userAppointments.set([
+      {
+        id: '1',
+        date: nextWeek,
+        time: '10:00',
+        service: 'Haircut',
+        professional: 'Dr. Sarah Johnson',
+        professionalId: 'prof1',
+        status: 'upcoming'
+      },
+      {
+        id: '2',
+        date: nextMonth,
+        time: '14:30',
+        service: 'Hair Color',
+        professional: 'Michael Chen',
+        professionalId: 'prof2',
+        status: 'upcoming'
+      }
+    ]);
+  }
+
+  hasUserAppointment(day: CalendarDay): boolean {
+    return this.userAppointments().some(apt =>
+      apt.date.getDate() === day.date.getDate() &&
+      apt.date.getMonth() === day.date.getMonth() &&
+      apt.date.getFullYear() === day.date.getFullYear() &&
+      apt.status === 'upcoming'
+    );
+  }
+
+  getUserAppointments(day: CalendarDay): UserAppointment[] {
+    return this.userAppointments().filter(apt =>
+      apt.date.getDate() === day.date.getDate() &&
+      apt.date.getMonth() === day.date.getMonth() &&
+      apt.date.getFullYear() === day.date.getFullYear() &&
+      apt.status === 'upcoming'
+    );
+  }
+
+  isPastDate(day: CalendarDay): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    return dayDate < today;
   }
 }

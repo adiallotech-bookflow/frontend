@@ -1,6 +1,27 @@
 <div>
   <div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900">Calendar</h1>
+    <h1 class="text-2xl font-bold text-gray-900">Book an Appointment</h1>
+    <p class="mt-1 text-sm text-gray-500">Select a date to view available time slots</p>
+  </div>
+  
+  <!-- Legend -->
+  <div class="mb-4 flex flex-wrap items-center gap-4 text-sm">
+    <div class="flex items-center gap-2">
+      <div class="h-3 w-3 rounded-full bg-indigo-600"></div>
+      <span class="text-gray-700">Your appointments</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="h-3 w-3 rounded-full bg-green-500"></div>
+      <span class="text-gray-700">Available</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="h-3 w-3 rounded-full bg-red-500"></div>
+      <span class="text-gray-700">Fully booked</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="h-3 w-3 rounded-full bg-gray-400"></div>
+      <span class="text-gray-700">Past date</span>
+    </div>
   </div>
   
   <div class="lg:flex lg:h-full lg:flex-col">
@@ -62,29 +83,54 @@
               (click)="selectDate(day)"
               [attr.data-is-current-month]="day.isCurrentMonth ? '' : null"
               [attr.data-is-today]="day.isToday ? '' : null"
-              class="relative bg-gray-50 px-3 py-2 text-gray-500 data-[is-current-month]:bg-white"
-              [class.cursor-pointer]="day.isAvailable && day.isCurrentMonth"
-              [class.hover:bg-gray-100]="day.isAvailable && day.isCurrentMonth"
+              class="relative bg-gray-50 px-3 py-2 text-gray-500 data-[is-current-month]:bg-white min-h-[100px]"
+              [class.cursor-pointer]="day.isCurrentMonth && !hasUserAppointment(day) && !isPastDate(day)"
+              [class.hover:bg-gray-100]="day.isCurrentMonth && !hasUserAppointment(day) && !isPastDate(day)"
+              [class.bg-indigo-50]="hasUserAppointment(day) && day.isCurrentMonth"
+              [class.border-2]="hasUserAppointment(day) && day.isCurrentMonth"
+              [class.border-indigo-300]="hasUserAppointment(day) && day.isCurrentMonth"
+              [class.opacity-40]="isPastDate(day) && day.isCurrentMonth"
+              [class.bg-gray-100]="isPastDate(day) && day.isCurrentMonth"
             >
               <time
                 [attr.datetime]="day.date | date:'yyyy-MM-dd'"
                 class="[[data-is-today]_&]:flex [[data-is-today]_&]:size-6 [[data-is-today]_&]:items-center [[data-is-today]_&]:justify-center [[data-is-today]_&]:rounded-full [[data-is-today]_&]:bg-indigo-600 [[data-is-today]_&]:font-semibold [[data-is-today]_&]:text-white"
-                [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+                [class.text-gray-900]="day.isCurrentMonth && !day.isToday && !isPastDate(day)"
+                [class.text-gray-400]="day.isCurrentMonth && isPastDate(day)"
+                [class.line-through]="isPastDate(day) && day.isCurrentMonth"
               >
                 {{ day.dayNumber }}
               </time>
 
-              @if (day.isAvailable && day.isCurrentMonth) {
-                <div class="mt-2">
-                  <div class="text-xs">
-                    <span class="font-medium text-green-700">{{ getAvailableSlotCount(day) }} slots</span>
-                  </div>
-                </div>
-              }
-
-              @if (!day.isAvailable && day.isCurrentMonth && !day.isWeekend) {
-                <div class="mt-2">
-                  <div class="text-xs text-red-600 font-medium">Fully booked</div>
+              @if (day.isCurrentMonth) {
+                <div class="mt-2 space-y-1">
+                  @if (hasUserAppointment(day)) {
+                    @for (apt of getUserAppointments(day); track apt.id) {
+                      <div class="flex items-center gap-1">
+                        <div class="h-2 w-2 rounded-full bg-indigo-600"></div>
+                        <span class="text-xs font-medium text-indigo-700">{{ apt.time }} - {{ apt.service }}</span>
+                      </div>
+                    }
+                  }
+                  
+                  @if (day.isAvailable && !hasUserAppointment(day)) {
+                    <div class="flex items-center gap-1">
+                      <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                      <span class="text-xs font-medium text-green-700">{{ getAvailableSlotCount(day) }} slots</span>
+                    </div>
+                  }
+                  
+                  @if (!day.isAvailable && !day.isWeekend && !hasUserAppointment(day)) {
+                    <div class="flex items-center gap-1">
+                      @if (isPastDate(day)) {
+                        <div class="h-2 w-2 rounded-full bg-gray-400"></div>
+                        <span class="text-xs font-medium text-gray-500">Past date</span>
+                      } @else {
+                        <div class="h-2 w-2 rounded-full bg-red-500"></div>
+                        <span class="text-xs font-medium text-red-600">Fully booked</span>
+                      }
+                    </div>
+                  }
                 </div>
               }
             </div>
@@ -101,26 +147,35 @@
               (click)="selectDate(day)"
               [attr.data-is-current-month]="day.isCurrentMonth ? '' : null"
               [attr.data-is-today]="day.isToday ? '' : null"
-              [disabled]="!day.isCurrentMonth"
+              [disabled]="!day.isCurrentMonth || isPastDate(day)"
               class="flex h-14 flex-col bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 focus:z-10 data-[is-current-month]:bg-white"
+              [class.opacity-40]="isPastDate(day) && day.isCurrentMonth"
+              [class.bg-gray-100]="isPastDate(day) && day.isCurrentMonth"
             >
               <time
                 [attr.datetime]="day.date | date:'yyyy-MM-dd'"
                 class="ml-auto [[data-is-today]_&]:flex [[data-is-today]_&]:size-6 [[data-is-today]_&]:items-center [[data-is-today]_&]:justify-center [[data-is-today]_&]:rounded-full [[data-is-today]_&]:bg-indigo-600 [[data-is-today]_&]:font-semibold [[data-is-today]_&]:text-white"
-                [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+                [class.text-gray-900]="day.isCurrentMonth && !day.isToday && !isPastDate(day)"
+                [class.text-gray-400]="day.isCurrentMonth && isPastDate(day)"
+                [class.line-through]="isPastDate(day) && day.isCurrentMonth"
               >
                 {{ day.dayNumber }}
               </time>
-              @if (day.isAvailable && day.isCurrentMonth) {
-                <span class="sr-only">{{ getAvailableSlotCount(day) }} slots available</span>
-                <span class="-mx-0.5 mt-auto flex flex-wrap-reverse">
-                  <span class="mx-0.5 mb-1 h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                </span>
-              }
-              @if (!day.isAvailable && day.isCurrentMonth && !day.isWeekend) {
-                <span class="sr-only">Fully booked</span>
-                <span class="-mx-0.5 mt-auto flex flex-wrap-reverse">
-                  <span class="mx-0.5 mb-1 h-1.5 w-1.5 rounded-full bg-red-500"></span>
+              @if (day.isCurrentMonth) {
+                <span class="-mx-0.5 mt-auto flex flex-wrap-reverse gap-0.5">
+                  @if (hasUserAppointment(day)) {
+                    <span class="mx-0.5 mb-1 h-2 w-2 rounded-full bg-indigo-600"></span>
+                  }
+                  @if (day.isAvailable && !hasUserAppointment(day)) {
+                    <span class="mx-0.5 mb-1 h-2 w-2 rounded-full bg-green-500"></span>
+                  }
+                  @if (!day.isAvailable && !day.isWeekend && !hasUserAppointment(day)) {
+                    @if (isPastDate(day)) {
+                      <span class="mx-0.5 mb-1 h-2 w-2 rounded-full bg-gray-400"></span>
+                    } @else {
+                      <span class="mx-0.5 mb-1 h-2 w-2 rounded-full bg-red-500"></span>
+                    }
+                  }
                 </span>
               }
             </button>
