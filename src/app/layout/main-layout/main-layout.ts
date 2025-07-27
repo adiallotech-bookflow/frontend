@@ -21,7 +21,7 @@ export class MainLayout {
 
   navItems: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: '' },
-    { label: 'Calendar', route: '/calendar', icon: '' },
+    { label: 'Booking', route: '/booking', icon: '' },
     { label: 'My Appointments', route: '/appointments', icon: '' }
   ];
 
