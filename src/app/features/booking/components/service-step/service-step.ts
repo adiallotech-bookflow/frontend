@@ -1,7 +1,8 @@
-import { Component, input, output, OnInit, inject, signal } from '@angular/core';
+import { Component, input, output, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Service } from '../../../../core/models';
 import { AppointmentsMockService } from '../../../../core/services/mock';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-service-step',
@@ -18,25 +19,34 @@ export class ServiceStep implements OnInit {
   services = signal<Service[]>([]);
   categories = signal<{ id: string; name: string; icon: string }[]>([]);
   selectedCategory = signal('all');
+  isLoading = signal(true);
 
   ngOnInit() {
-    // Load services from mock service
-    this.appointmentsService.getAvailableServices().subscribe(services => {
-      this.services.set(services);
-    });
-
-    // Load categories from mock service
-    this.appointmentsService.getServiceCategories().subscribe(categories => {
-      this.categories.set(categories);
+    this.isLoading.set(true);
+    
+    // Load services and categories in parallel
+    forkJoin({
+      services: this.appointmentsService.getAvailableServices(),
+      categories: this.appointmentsService.getServiceCategories()
+    }).subscribe({
+      next: ({ services, categories }) => {
+        this.services.set(services);
+        this.categories.set(categories);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading services:', error);
+        this.isLoading.set(false);
+      }
     });
   }
 
-  get filteredServices(): Service[] {
+  filteredServices = computed(() => {
     if (this.selectedCategory() === 'all') {
       return this.services();
     }
     return this.services().filter(s => s.categoryId === this.selectedCategory());
-  }
+  });
 
   selectService(service: Service): void {
     this.serviceSelected.emit(service);

@@ -35,6 +35,7 @@ export class Booking implements OnInit {
 
   bookingForm: FormGroup;
   currentStep = signal<StepName>('service');
+  isLoading = signal(true);
 
   steps = signal<BookingStep[]>([
     { id: 1, name: 'service', label: 'Service', completed: false, active: true },
@@ -101,29 +102,35 @@ export class Booking implements OnInit {
   }
 
   ngOnInit(): void {
+    // Simulate initial loading
+    this.isLoading.set(true);
+    
     // Pre-fill form with current user data if available
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      const detailsForm = this.bookingForm.get('details');
-      detailsForm?.patchValue({
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName,
-        email: currentUser.email,
-        phone: '' // User might not have phone in the model, leave empty for user to fill
-      });
-
-      // Also update the signal for immediate display
-      this.formData.update(data => ({
-        ...data,
-        details: {
+    setTimeout(() => {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser) {
+        const detailsForm = this.bookingForm.get('details');
+        detailsForm?.patchValue({
           firstName: currentUser.firstName,
           lastName: currentUser.lastName,
           email: currentUser.email,
-          phone: '',
-          notes: ''
-        }
-      }));
-    }
+          phone: '' // User might not have phone in the model, leave empty for user to fill
+        });
+
+        // Also update the signal for immediate display
+        this.formData.update(data => ({
+          ...data,
+          details: {
+            firstName: currentUser.firstName,
+            lastName: currentUser.lastName,
+            email: currentUser.email,
+            phone: '',
+            notes: ''
+          }
+        }));
+      }
+      this.isLoading.set(false);
+    }, 500); // Small delay to show loading state
   }
 
   goToStep(stepName: StepName): void {
