@@ -219,44 +219,64 @@ export class Booking implements OnInit {
         return;
       }
 
-      // Create appointment data
-      const appointmentData = {
-        customerId: currentUser.id,
-        professionalId: formData.professional!.id,
-        service: formData.service!.name,
-        date: formData.date!.toISOString().split('T')[0],
-        time: formData.time!,
-        duration: formData.service!.duration,
-        price: formData.service!.price,
-        notes: formData.details?.notes
-      };
-      console.log('Appointment data:', appointmentData);
-      // Create the appointment
-      this.appointmentsService.createAppointment(appointmentData).subscribe({
-        next: (appointment) => {
-          console.log('Appointment created:', appointment);
-          this.notificationService.show({
-            type: 'success',
-            title: 'Booking Confirmed!',
-            message: `Your ${formData.service!.name} appointment with ${formData.professional!.name} has been confirmed for ${formData.date!.toLocaleDateString()} at ${formData.time}.`,
-            duration: 7000
-          });
-
-          // Navigate to dashboard after a short delay
-          setTimeout(() => {
-            this.router.navigate(['/dashboard']);
-          }, 2000);
+      // Show confirmation notification
+      this.notificationService.showConfirmation(
+        'Confirm Booking',
+        `Are you sure you want to book ${formData.service!.name} with ${formData.professional!.name} on ${formData.date!.toLocaleDateString()} at ${formData.time}? Total: $${formData.service!.price}`,
+        () => {
+          // On confirm - proceed with booking
+          this.proceedWithBooking();
         },
-        error: (error) => {
-          this.notificationService.show({
-            type: 'error',
-            title: 'Booking Failed',
-            message: 'There was an error creating your appointment. Please try again.',
-            duration: 5000
-          });
-          console.error('Booking error:', error);
+        () => {
+          // On cancel - do nothing, notification will be auto-dismissed
         }
-      });
+      );
     }
+  }
+
+  private proceedWithBooking(): void {
+    const formData = this.formData();
+    const currentUser = this.authService.getCurrentUser();
+
+    if (!currentUser) return;
+
+    // Create appointment data
+    const appointmentData = {
+      customerId: currentUser.id,
+      professionalId: formData.professional!.id,
+      service: formData.service!.name,
+      date: formData.date!.toISOString().split('T')[0],
+      time: formData.time!,
+      duration: formData.service!.duration,
+      price: formData.service!.price,
+      notes: formData.details?.notes
+    };
+    console.log('Appointment data:', appointmentData);
+    // Create the appointment
+    this.appointmentsService.createAppointment(appointmentData).subscribe({
+      next: (appointment) => {
+        console.log('Appointment created:', appointment);
+        this.notificationService.show({
+          type: 'success',
+          title: 'Booking Confirmed!',
+          message: `Your ${formData.service!.name} appointment with ${formData.professional!.name} has been confirmed for ${formData.date!.toLocaleDateString()} at ${formData.time}.`,
+          duration: 7000
+        });
+
+        // Navigate to dashboard after a short delay
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 2000);
+      },
+      error: (error) => {
+        this.notificationService.show({
+          type: 'error',
+          title: 'Booking Failed',
+          message: 'There was an error creating your appointment. Please try again.',
+          duration: 5000
+        });
+        console.error('Booking error:', error);
+      }
+    });
   }
 }

@@ -253,6 +253,24 @@ export class Appointments implements OnInit {
   }
 
   cancelAppointment(id: string): void {
+    const appointment = this.appointments().find(apt => apt.id === id);
+    if (!appointment) return;
+
+    // Show confirmation notification
+    this.notificationService.showConfirmation(
+      'Cancel Appointment?',
+      `Are you sure you want to cancel your ${appointment.service} appointment on ${this.formatDate(appointment.date)} at ${appointment.time}?`,
+      () => {
+        this.proceedWithCancellation(id);
+      },
+      () => {
+        // On cancel - do nothing, notification will be auto-dismissed
+      },
+      'danger' // Use red color for the confirm button
+    );
+  }
+
+  private proceedWithCancellation(id: string): void {
     this.appointmentsService.cancelAppointment(id).subscribe({
       next: () => {
         // Update local state
@@ -261,7 +279,7 @@ export class Appointments implements OnInit {
             apt.id === id ? { ...apt, status: 'cancelled' as const } : apt
           )
         );
-        
+
         // Show success notification
         this.notificationService.show({
           type: 'success',
@@ -270,7 +288,7 @@ export class Appointments implements OnInit {
           autoClose: true,
           duration: 5000
         });
-        
+
         // Reload stats to reflect the change
         this.loadStats();
       },

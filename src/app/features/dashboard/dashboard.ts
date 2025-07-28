@@ -50,9 +50,7 @@ export class Dashboard implements OnInit, OnDestroy {
   });
   recentActivity = signal<DashboardActivity[]>([]);
 
-  showCancelDialog = signal(false);
   showReschedulePanel = signal(false);
-  selectedAppointment = signal<DashboardAppointment | null>(null);
   appointmentToReschedule = signal<AppointmentDetails | null>(null);
   currentTime = signal(new Date());
   
@@ -119,8 +117,19 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   openCancelDialog(appointment: DashboardAppointment) {
-    this.selectedAppointment.set(appointment);
-    this.showCancelDialog.set(true);
+    // Show confirmation notification
+    this.notificationService.showConfirmation(
+      'Cancel Appointment?',
+      `Are you sure you want to cancel your ${appointment.service} appointment on ${this.formatDate(appointment.date)} at ${appointment.time}?`,
+      () => {
+        // On confirm - cancel the appointment
+        this.confirmCancel(appointment);
+      },
+      () => {
+        // On cancel - do nothing, notification will be auto-dismissed
+      },
+      'danger' // Use red color for the confirm button
+    );
   }
 
   openReschedulePanel(appointment: DashboardAppointment) {
@@ -145,8 +154,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.showReschedulePanel.set(true);
   }
 
-  confirmCancel() {
-    const appointment = this.selectedAppointment();
+  confirmCancel(appointment: DashboardAppointment) {
     if (appointment) {
       this.appointments.update(apts =>
         apts.map(apt =>
@@ -165,9 +173,6 @@ export class Dashboard implements OnInit, OnDestroy {
         ...activities
       ]);
     }
-
-    this.showCancelDialog.set(false);
-    this.selectedAppointment.set(null);
   }
 
   closeReschedulePanel(): void {
@@ -218,11 +223,6 @@ export class Dashboard implements OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  closeDialog() {
-    this.showCancelDialog.set(false);
-    this.selectedAppointment.set(null);
   }
 
   private calculateEndTime(startTime: string, duration: number): string {

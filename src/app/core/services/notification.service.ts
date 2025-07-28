@@ -8,7 +8,7 @@ export interface Notification {
   actions?: {
     label: string;
     action: () => void;
-    style?: 'primary' | 'secondary';
+    style?: 'primary' | 'secondary' | 'danger';
   }[];
   autoClose?: boolean;
   duration?: number;
@@ -35,7 +35,7 @@ export class NotificationService {
     return id;
   }
 
-  showConfirmation(title: string, message: string, onConfirm: () => void, onCancel?: () => void): string {
+  showConfirmation(title: string, message: string, onConfirm: () => void, onCancel?: () => void, confirmStyle: 'primary' | 'danger' = 'primary'): string {
     return this.show({
       type: 'confirmation',
       title,
@@ -48,7 +48,7 @@ export class NotificationService {
             onConfirm();
             this.dismiss(this.notifications().find(n => n.title === title && n.message === message)?.id || '');
           },
-          style: 'primary'
+          style: confirmStyle
         },
         {
           label: 'Cancel',
