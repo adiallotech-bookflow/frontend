@@ -4,6 +4,7 @@ import { AppointmentDetails, AppointmentFilter, AppointmentStats } from '../../c
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { AppointmentsMockService } from '../../core/services/mock';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { map } from 'rxjs/operators';
 import { SlideoverComponent } from '../../shared/components/slideover/slideover';
 import { RescheduleAppointmentComponent } from './components/reschedule-appointment/reschedule-appointment';
@@ -30,6 +31,7 @@ import { RescheduleAppointmentComponent } from './components/reschedule-appointm
 export class Appointments implements OnInit {
   private appointmentsService = inject(AppointmentsMockService);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   appointments = signal<AppointmentDetails[]>([]);
   filter = signal<AppointmentFilter>({ status: 'all', dateRange: 'all' });
   searchTerm = signal('');
@@ -259,11 +261,29 @@ export class Appointments implements OnInit {
             apt.id === id ? { ...apt, status: 'cancelled' as const } : apt
           )
         );
+        
+        // Show success notification
+        this.notificationService.show({
+          type: 'success',
+          title: 'Appointment Cancelled',
+          message: 'Your appointment has been successfully cancelled.',
+          autoClose: true,
+          duration: 5000
+        });
+        
         // Reload stats to reflect the change
         this.loadStats();
       },
       error: (error) => {
         console.error('Error cancelling appointment:', error);
+        // Show error notification
+        this.notificationService.show({
+          type: 'error',
+          title: 'Cancellation Failed',
+          message: 'Unable to cancel the appointment. Please try again.',
+          autoClose: true,
+          duration: 5000
+        });
       }
     });
   }
@@ -347,14 +367,27 @@ export class Appointments implements OnInit {
         this.closeReschedulePanel();
 
         // Show success notification
-        console.log('Appointment rescheduled successfully');
+        this.notificationService.show({
+          type: 'success',
+          title: 'Appointment Rescheduled',
+          message: `Your appointment has been successfully rescheduled to ${new Date(newSchedule.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${newSchedule.time}.`,
+          autoClose: true,
+          duration: 5000
+        });
 
         // Reload stats to reflect any changes
         this.loadStats();
       },
       error: (error) => {
         console.error('Error rescheduling appointment:', error);
-        // In a real app, show error notification to user
+        // Show error notification
+        this.notificationService.show({
+          type: 'error',
+          title: 'Reschedule Failed',
+          message: 'Unable to reschedule the appointment. Please try again.',
+          autoClose: true,
+          duration: 5000
+        });
       }
     });
   }

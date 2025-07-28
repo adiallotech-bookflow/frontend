@@ -4,13 +4,16 @@ import { RouterLink } from '@angular/router';
 import { animate, style, transition, trigger, stagger, query } from '@angular/animations';
 import { interval, Subscription } from 'rxjs';
 import { formatDistanceToNow, isFuture, format } from 'date-fns';
-import { DashboardAppointment, DashboardStats, DashboardActivity, AppointmentExtended } from '../../core/models';
+import { DashboardAppointment, DashboardStats, DashboardActivity, AppointmentExtended, AppointmentDetails } from '../../core/models';
 import { AppointmentsMockService } from '../../core/services/mock';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { SlideoverComponent } from '../../shared/components/slideover/slideover';
+import { RescheduleAppointmentComponent } from '../appointments/components/reschedule-appointment/reschedule-appointment';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SlideoverComponent, RescheduleAppointmentComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   animations: [
@@ -35,6 +38,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class Dashboard implements OnInit, OnDestroy {
   private appointmentsService = inject(AppointmentsMockService);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   private timeSubscription?: Subscription;
 
   appointments = signal<DashboardAppointment[]>([]);
@@ -47,8 +51,9 @@ export class Dashboard implements OnInit, OnDestroy {
   recentActivity = signal<DashboardActivity[]>([]);
 
   showCancelDialog = signal(false);
-  showRescheduleDialog = signal(false);
+  showReschedulePanel = signal(false);
   selectedAppointment = signal<DashboardAppointment | null>(null);
+  appointmentToReschedule = signal<AppointmentDetails | null>(null);
   currentTime = signal(new Date());
   
   // Loading state
@@ -118,9 +123,26 @@ export class Dashboard implements OnInit, OnDestroy {
     this.showCancelDialog.set(true);
   }
 
-  openRescheduleDialog(appointment: DashboardAppointment) {
-    this.selectedAppointment.set(appointment);
-    this.showRescheduleDialog.set(true);
+  openReschedulePanel(appointment: DashboardAppointment) {
+    // Convert DashboardAppointment to AppointmentDetails format
+    const appointmentDetails: AppointmentDetails = {
+      id: appointment.id,
+      date: appointment.date,
+      time: appointment.time,
+      endTime: this.calculateEndTime(appointment.time, appointment.duration),
+      service: appointment.service,
+      serviceCategory: 'General Services',
+      professional: appointment.professional,
+      professionalAvatar: appointment.professionalAvatar,
+      location: 'Downtown Salon',
+      status: appointment.status,
+      price: appointment.price,
+      duration: appointment.duration,
+      notes: '',
+      createdAt: new Date()
+    };
+    this.appointmentToReschedule.set(appointmentDetails);
+    this.showReschedulePanel.set(true);
   }
 
   confirmCancel() {
@@ -148,20 +170,68 @@ export class Dashboard implements OnInit, OnDestroy {
     this.selectedAppointment.set(null);
   }
 
-  confirmReschedule() {
-    const appointment = this.selectedAppointment();
-    if (appointment) {
-      console.log('Rescheduling appointment:', appointment.id);
-    }
+  closeReschedulePanel(): void {
+    this.showReschedulePanel.set(false);
+    this.appointmentToReschedule.set(null);
+  }
 
-    this.showRescheduleDialog.set(false);
-    this.selectedAppointment.set(null);
+  rescheduleAppointment(appointmentId: string, newSchedule: { date: string; time: string }): void {
+    this.appointmentsService.rescheduleAppointment(appointmentId, newSchedule).subscribe({
+      next: () => {
+        // Update local state
+        this.appointments.update(appointments =>
+          appointments.map(apt =>
+            apt.id === appointmentId
+              ? {
+                  ...apt,
+                  date: new Date(newSchedule.date),
+                  time: newSchedule.time
+                }
+              : apt
+          )
+        );
+
+        // Close the panel
+        this.closeReschedulePanel();
+
+        // Show success notification
+        this.notificationService.show({
+          type: 'success',
+          title: 'Appointment Rescheduled',
+          message: `Your appointment has been successfully rescheduled to ${new Date(newSchedule.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${newSchedule.time}.`,
+          autoClose: true,
+          duration: 5000
+        });
+
+        // Reload data
+        this.loadDashboardData();
+      },
+      error: (error) => {
+        console.error('Error rescheduling appointment:', error);
+        // Show error notification
+        this.notificationService.show({
+          type: 'error',
+          title: 'Reschedule Failed',
+          message: 'Unable to reschedule the appointment. Please try again.',
+          autoClose: true,
+          duration: 5000
+        });
+      }
+    });
   }
 
   closeDialog() {
     this.showCancelDialog.set(false);
-    this.showRescheduleDialog.set(false);
     this.selectedAppointment.set(null);
+  }
+
+  private calculateEndTime(startTime: string, duration: number): string {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startMinutes = hours * 60 + minutes;
+    const endMinutes = startMinutes + duration;
+    const endHours = Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
+    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
   }
 
   private loadDashboardData() {
