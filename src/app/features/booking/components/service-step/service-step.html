@@ -4,19 +4,6 @@
   <!-- Category Filter -->
   <div class="mb-6">
     <div class="flex flex-wrap gap-2">
-      <!-- All category button -->
-      <button
-        type="button"
-        (click)="selectCategory('all')"
-        class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-        [class.bg-indigo-600]="selectedCategory() === 'all'"
-        [class.text-white]="selectedCategory() === 'all'"
-        [class.bg-gray-100]="selectedCategory() !== 'all'"
-        [class.text-gray-700]="selectedCategory() !== 'all'"
-        [class.hover:bg-gray-200]="selectedCategory() !== 'all'"
-      >
-        All Services
-      </button>
       @for (category of categories(); track category.id) {
         <button
           type="button"
