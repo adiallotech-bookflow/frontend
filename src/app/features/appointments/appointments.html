@@ -15,34 +15,34 @@
       </div>
     } @else {
       <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">My Appointments</h1>
-        <p class="mt-2 text-gray-600">Manage and track all your appointments</p>
+      <div class="mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">My Appointments</h1>
+        <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage and track all your appointments</p>
       </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-sm font-medium text-gray-600">Total Appointments</p>
-        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats().total }}</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Total Appointments</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900">{{ stats().total }}</p>
       </div>
-      <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-sm font-medium text-gray-600">Upcoming</p>
-        <p class="mt-2 text-3xl font-bold text-blue-600">{{ stats().upcoming }}</p>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Upcoming</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-blue-600">{{ stats().upcoming }}</p>
       </div>
-      <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-sm font-medium text-gray-600">Completed</p>
-        <p class="mt-2 text-3xl font-bold text-green-600">{{ stats().completed }}</p>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Completed</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-green-600">{{ stats().completed }}</p>
       </div>
-      <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-sm font-medium text-gray-600">Cancelled</p>
-        <p class="mt-2 text-3xl font-bold text-red-600">{{ stats().cancelled }}</p>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Cancelled</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-red-600">{{ stats().cancelled }}</p>
       </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Search -->
         <div>
           <label for="search" class="block text-sm/6 font-medium text-gray-900">Search</label>
@@ -176,40 +176,40 @@
           <div class="space-y-4" [@listAnimation]="groupedAppointments().upcoming.length">
             @for (appointment of groupedAppointments().upcoming; track appointment.id) {
               <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                <div class="p-6">
-                  <div class="flex items-start justify-between">
-                    <div class="flex items-start space-x-4">
+                <div class="p-4 sm:p-6">
+                  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div class="flex items-start space-x-3 sm:space-x-4">
                       <!-- Professional Avatar -->
                       <img
                         [src]="appointment.professionalAvatar"
                         [alt]="appointment.professional"
-                        class="w-12 h-12 rounded-full"
+                        class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
                       />
 
                       <!-- Appointment Details -->
-                      <div>
-                        <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ appointment.service }}</h3>
                         <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
 
-                        <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-500">
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            {{ formatDate(appointment.date) }}
+                            <span class="truncate">{{ formatDate(appointment.date) }}</span>
                           </span>
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             {{ appointment.time }} - {{ appointment.endTime }}
                           </span>
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {{ appointment.location }}
+                            <span class="truncate">{{ appointment.location }}</span>
                           </span>
                         </div>
 
@@ -220,18 +220,19 @@
                     </div>
 
                     <!-- Right side: Status and Actions -->
-                    <div class="flex flex-col items-end space-y-3">
-                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
-                        {{ appointment.status }}
-                      </span>
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-3 mt-3 sm:mt-0">
+                      <div class="flex items-center gap-3 sm:flex-col sm:items-end">
+                        <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ' + getStatusColor(appointment.status)">
+                          {{ appointment.status }}
+                        </span>
+                        <div class="text-base sm:text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+                      </div>
 
-                      <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
-
-                      <div class="flex space-x-2">
+                      <div class="flex items-center gap-2">
                         <button
                           type="button"
                           (click)="openReschedulePanel(appointment)"
-                          class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                          class="text-xs sm:text-sm text-indigo-600 hover:text-indigo-500 font-medium whitespace-nowrap"
                         >
                           Reschedule
                         </button>
@@ -239,7 +240,7 @@
                         <button
                           type="button"
                           (click)="cancelAppointment(appointment.id)"
-                          class="text-sm text-red-600 hover:text-red-500 font-medium"
+                          class="text-xs sm:text-sm text-red-600 hover:text-red-500 font-medium whitespace-nowrap"
                         >
                           Cancel
                         </button>
@@ -267,40 +268,40 @@
           <div class="space-y-4" [@listAnimation]="groupedAppointments().completed.length">
             @for (appointment of groupedAppointments().completed; track appointment.id) {
               <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow opacity-75">
-                <div class="p-6">
-                  <div class="flex items-start justify-between">
-                    <div class="flex items-start space-x-4">
+                <div class="p-4 sm:p-6">
+                  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div class="flex items-start space-x-3 sm:space-x-4">
                       <!-- Professional Avatar -->
                       <img
                         [src]="appointment.professionalAvatar"
                         [alt]="appointment.professional"
-                        class="w-12 h-12 rounded-full"
+                        class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0"
                       />
 
                       <!-- Appointment Details -->
-                      <div>
-                        <h3 class="text-lg font-semibold text-gray-900">{{ appointment.service }}</h3>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ appointment.service }}</h3>
                         <p class="text-sm text-gray-600 mt-1">with {{ appointment.professional }}</p>
 
-                        <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-500">
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            {{ formatDate(appointment.date) }}
+                            <span class="truncate">{{ formatDate(appointment.date) }}</span>
                           </span>
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             {{ appointment.time }} - {{ appointment.endTime }}
                           </span>
                           <span class="flex items-center">
-                            <svg class="mr-1.5 h-4 w-4 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mr-1 sm:mr-1.5 h-4 w-4 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {{ appointment.location }}
+                            <span class="truncate">{{ appointment.location }}</span>
                           </span>
                         </div>
 
@@ -311,12 +312,12 @@
                     </div>
 
                     <!-- Right side: Status and Price -->
-                    <div class="flex flex-col items-end space-y-3">
-                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(appointment.status)">
+                    <div class="flex items-center sm:flex-col sm:items-end justify-between sm:justify-start gap-3 mt-3 sm:mt-0">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ' + getStatusColor(appointment.status)">
                         {{ appointment.status }}
                       </span>
 
-                      <div class="text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
+                      <div class="text-base sm:text-lg font-semibold text-gray-900">${{ appointment.price }}</div>
                     </div>
                   </div>
                 </div>
@@ -340,7 +341,7 @@
           <div class="space-y-4" [@listAnimation]="groupedAppointments().cancelled.length">
             @for (appointment of groupedAppointments().cancelled; track appointment.id) {
               <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow opacity-60">
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                   <div class="flex items-start justify-between">
                     <div class="flex items-start space-x-4">
                       <!-- Professional Avatar -->

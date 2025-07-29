@@ -17,15 +17,15 @@
       <!-- Header -->
       <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p class="mt-1 text-sm text-gray-500">Welcome back!</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-500">Welcome back!</p>
         </div>
         <div class="mt-4 sm:mt-0">
           <a
             routerLink="/booking"
-            class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 border border-transparent shadow-sm text-sm sm:text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            <svg class="mr-2 -ml-1 h-5 w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="mr-2 -ml-1 h-4 w-4 sm:h-5 sm:w-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Start a Booking
@@ -34,83 +34,32 @@
       </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8" [@listAnimation]="quickStats()">
-      <div class="bg-white overflow-hidden shadow rounded-lg" @cardAnimation>
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
-                <dd class="text-lg font-semibold text-gray-900">{{ quickStats().totalBookings }}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8" [@listAnimation]="quickStats()">
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6" @cardAnimation>
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Total Bookings</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900">{{ quickStats().totalBookings }}</p>
       </div>
 
-      <div class="bg-white overflow-hidden shadow rounded-lg" @cardAnimation>
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">This Month</dt>
-                <dd class="text-lg font-semibold text-gray-900">{{ quickStats().thisMonth }}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6" @cardAnimation>
+        <p class="text-xs sm:text-sm font-medium text-gray-600">This Month</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-blue-600">{{ quickStats().thisMonth }}</p>
       </div>
 
-      <div class="bg-white overflow-hidden shadow rounded-lg" @cardAnimation>
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Next Appointment</dt>
-                <dd class="text-lg font-semibold text-gray-900">
-                  @if (quickStats().nextAppointment) {
-                    {{ getCountdown(quickStats().nextAppointment!) }}
-                  } @else {
-                    None scheduled
-                  }
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6" @cardAnimation>
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Next Appointment</p>
+        <p class="mt-1 sm:mt-2 text-base sm:text-lg font-bold text-green-600">
+          @if (quickStats().nextAppointment) {
+            {{ getCountdown(quickStats().nextAppointment!) }}
+          } @else {
+            None scheduled
+          }
+        </p>
       </div>
 
-      <div class="bg-white overflow-hidden shadow rounded-lg" @cardAnimation>
-        <div class="p-5">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-gray-400 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="ml-5 w-0 flex-1">
-              <dl>
-                <dt class="text-sm font-medium text-gray-500 truncate">Total Spent</dt>
-                <dd class="text-lg font-semibold text-gray-900">${{ quickStats().totalSpent }}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+      <div class="bg-white rounded-lg shadow p-4 sm:p-6" @cardAnimation>
+        <p class="text-xs sm:text-sm font-medium text-gray-600">Total Spent</p>
+        <p class="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-indigo-600">${{ quickStats().totalSpent }}</p>
       </div>
     </div>
 
@@ -123,31 +72,31 @@
           <div class="space-y-4" [@listAnimation]="upcomingAppointments()">
             @for (appointment of upcomingAppointments(); track appointment.id) {
               <div class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow duration-200" @cardAnimation>
-                <div class="flex items-start justify-between">
-                  <div class="flex items-start space-x-4">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div class="flex items-start space-x-3 sm:space-x-4">
                     <img
                       [src]="appointment.professionalAvatar"
                       [alt]="appointment.professional"
-                      class="h-12 w-12 rounded-full"
+                      class="h-10 w-10 sm:h-12 sm:w-12 rounded-full flex-shrink-0"
                     >
-                    <div>
-                      <h3 class="text-lg font-medium text-gray-900">{{ appointment.service }}</h3>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-base sm:text-lg font-medium text-gray-900 truncate">{{ appointment.service }}</h3>
                       <p class="text-sm text-gray-500">with {{ appointment.professional }}</p>
-                      <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                      <div class="mt-2 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                         <div class="flex items-center">
-                          <svg class="h-4 w-4 mr-1 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="h-4 w-4 mr-1 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          {{ formatDate(appointment.date) }}
+                          <span class="truncate">{{ formatDate(appointment.date) }}</span>
                         </div>
                         <div class="flex items-center">
-                          <svg class="h-4 w-4 mr-1 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="h-4 w-4 mr-1 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           {{ appointment.time }}
                         </div>
                         <div class="flex items-center">
-                          <svg class="h-4 w-4 mr-1 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="h-4 w-4 mr-1 fill-none flex-shrink-0" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           {{ appointment.duration }} min
@@ -156,22 +105,23 @@
                     </div>
                   </div>
 
-                  <div class="flex flex-col items-end space-y-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-2 mt-3 sm:mt-0">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap">
                       {{ getCountdown(appointment.date) }}
                     </span>
-                    <div class="flex space-x-2">
+                    <div class="flex items-center gap-2 sm:gap-2">
                       <button
                         type="button"
                         (click)="openReschedulePanel(appointment)"
-                        class="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                        class="text-xs sm:text-sm text-indigo-600 hover:text-indigo-500 font-medium whitespace-nowrap"
                       >
                         Reschedule
                       </button>
+                      <span class="text-gray-300">|</span>
                       <button
                         type="button"
                         (click)="openCancelDialog(appointment)"
-                        class="text-sm text-red-600 hover:text-red-500 font-medium"
+                        class="text-xs sm:text-sm text-red-600 hover:text-red-500 font-medium whitespace-nowrap"
                       >
                         Cancel
                       </button>
@@ -224,8 +174,8 @@
 
 
   <!-- Reschedule Slideover -->
-  <app-slideover 
-    [isOpen]="showReschedulePanel()" 
+  <app-slideover
+    [isOpen]="showReschedulePanel()"
     [title]="'Reschedule Appointment'"
     (close)="closeReschedulePanel()">
     @if (appointmentToReschedule()) {
